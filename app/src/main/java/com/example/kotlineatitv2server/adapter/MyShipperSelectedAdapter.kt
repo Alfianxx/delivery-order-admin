@@ -6,13 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlineatitv2server.R
 import com.example.kotlineatitv2server.callback.IRecyclerItemClickListener
 import com.example.kotlineatitv2server.model.ShipperModel
-import com.example.kotlineatitv2server.model.eventbus.UpdateActiveEvent
-import org.greenrobot.eventbus.EventBus
 
 class MyShipperSelectedAdapter (internal var context: Context,
                         internal var shipperList: List<ShipperModel>): RecyclerView.Adapter<MyShipperSelectedAdapter.MyViewHolder>() {
@@ -24,12 +21,12 @@ class MyShipperSelectedAdapter (internal var context: Context,
     inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
 
-        var txt_name: TextView?=null
-        var txt_phone: TextView?=null
+        var txtName: TextView?=null
+        var txtPhone: TextView?=null
 
-        var img_checked: ImageView?=null
+        var imgChecked: ImageView?=null
 
-        var iRecyclerItemClickListener:IRecyclerItemClickListener?=null
+        private var iRecyclerItemClickListener:IRecyclerItemClickListener?=null
 
         fun setClick(iRecyclerItemClickListener: IRecyclerItemClickListener)
         {
@@ -37,9 +34,9 @@ class MyShipperSelectedAdapter (internal var context: Context,
         }
 
         init{
-            txt_name = itemView.findViewById(R.id.txt_name) as TextView
-            txt_phone = itemView.findViewById(R.id.txt_phone) as TextView
-            img_checked = itemView.findViewById(R.id.img_checked) as ImageView
+            txtName = itemView.findViewById(R.id.txt_name) as TextView
+            txtPhone = itemView.findViewById(R.id.txt_phone) as TextView
+            imgChecked = itemView.findViewById(R.id.img_checked) as ImageView
 
             itemView.setOnClickListener(this)
         }
@@ -62,14 +59,14 @@ class MyShipperSelectedAdapter (internal var context: Context,
 
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.txt_name!!.setText(shipperList[position].name)
-        holder.txt_phone!!.setText(shipperList[position].phone)
+        holder.txtName!!.text = shipperList[position].name
+        holder.txtPhone!!.text = shipperList[position].phone
         holder.setClick(object:IRecyclerItemClickListener{
             override fun onItemClick(view: View, pos: Int) {
                 if (lastCheckedImageView != null)
                     lastCheckedImageView!!.setImageResource(0)
-                holder.img_checked!!.setImageResource(R.drawable.ic_baseline_check_24)
-                lastCheckedImageView = holder.img_checked
+                holder.imgChecked!!.setImageResource(R.drawable.ic_baseline_check_24)
+                lastCheckedImageView = holder.imgChecked
                 selectedShipper = shipperList[pos]
             }
 

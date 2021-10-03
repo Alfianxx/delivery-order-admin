@@ -22,12 +22,12 @@ import kotlinx.android.synthetic.main.activity_chat_list.*
 class ChatListActivity : AppCompatActivity() {
 
     lateinit var database:FirebaseDatabase
-    lateinit var chatRef:DatabaseReference
+    private lateinit var chatRef:DatabaseReference
 
     lateinit var adapter: FirebaseRecyclerAdapter<ChatInfoModel,ChatListViewHolder>
     lateinit var options: FirebaseRecyclerOptions<ChatInfoModel>
 
-    lateinit var layoutManager: LinearLayoutManager
+    private lateinit var layoutManager: LinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,16 +38,16 @@ class ChatListActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (adapter != null) adapter.startListening()
+        adapter.startListening()
     }
 
     override fun onResume() {
         super.onResume()
-        if (adapter != null) adapter.startListening()
+        adapter.startListening()
     }
 
     override fun onStop() {
-        if (adapter != null) adapter.stopListening()
+        adapter.stopListening()
         super.onStop()
     }
 
@@ -63,8 +63,8 @@ class ChatListActivity : AppCompatActivity() {
                 position: Int,
                 model: ChatInfoModel
             ) {
-                holder.txt_email.setText(model.createName)
-                holder.txt_chat_message.setText(model.lastMessage)
+                holder.txtEmail.text = model.createName
+                holder.txtChatMessage.text = model.lastMessage
 
                 holder.setListener(object : IRecyclerItemClickListener{
                     override fun onItemClick(view: View, pos: Int) {
@@ -85,7 +85,7 @@ class ChatListActivity : AppCompatActivity() {
 
     private fun initViews() {
         database = FirebaseDatabase.getInstance()
-        chatRef = database!!.getReference(Common.RESTAURANT_REF)
+        chatRef = database.getReference(Common.RESTAURANT_REF)
             .child(Common.currentServerUser!!.restaurant!!)
             .child(Common.CHAT_REF)
 
@@ -96,9 +96,9 @@ class ChatListActivity : AppCompatActivity() {
 
         layoutManager = LinearLayoutManager(this)
         recycler_chat_list.layoutManager = layoutManager
-        recycler_chat_list.addItemDecoration(DividerItemDecoration(this,layoutManager!!.orientation))
+        recycler_chat_list.addItemDecoration(DividerItemDecoration(this, layoutManager.orientation))
 
-        toolbar.setTitle(Common.currentServerUser!!.restaurant!!)
+        toolbar.title = Common.currentServerUser!!.restaurant!!
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

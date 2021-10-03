@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +25,6 @@ import com.example.kotlineatitv2server.callback.IMyButtonCallback
 import com.example.kotlineatitv2server.common.Common
 import com.example.kotlineatitv2server.common.MySwipeHelper
 import com.example.kotlineatitv2server.model.CategoryModel
-import com.example.kotlineatitv2server.model.FoodModel
 import com.example.kotlineatitv2server.model.eventbus.ToastEvent
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -45,13 +43,13 @@ class CategoryFragment : Fragment() {
     private lateinit var layoutAnimationController: LayoutAnimationController
     private var adapter: MyCategoriesAdapter?=null
 
-    private var recycler_menu: RecyclerView?=null
+    private var recyclerMenu: RecyclerView?=null
 
-    internal var categoryModels:List<CategoryModel> = ArrayList<CategoryModel>()
-    internal lateinit var storage: FirebaseStorage
-    internal lateinit var storageReference:StorageReference
+    internal var categoryModels:List<CategoryModel> = ArrayList()
+    private lateinit var storage: FirebaseStorage
+    private lateinit var storageReference:StorageReference
     private var imageUri: Uri?=null
-    internal lateinit var img_category:ImageView
+    private lateinit var imgCategory:ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,8 +70,8 @@ class CategoryFragment : Fragment() {
             dialog.dismiss()
             categoryModels = it
             adapter = MyCategoriesAdapter(requireContext(), categoryModels)
-            recycler_menu!!.adapter =  adapter
-            recycler_menu!!.layoutAnimation = layoutAnimationController
+            recyclerMenu!!.adapter =  adapter
+            recyclerMenu!!.layoutAnimation = layoutAnimationController
         })
         return root
     }
@@ -87,14 +85,14 @@ class CategoryFragment : Fragment() {
         dialog.show()
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_item_from_left)
 
-        recycler_menu = root.findViewById(R.id.recycler_menu) as RecyclerView
-        recycler_menu!!.setHasFixedSize(true)
+        recyclerMenu = root.findViewById(R.id.recycler_menu) as RecyclerView
+        recyclerMenu!!.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(context)
 
-        recycler_menu!!.layoutManager = layoutManager
-        recycler_menu!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
+        recyclerMenu!!.layoutManager = layoutManager
+        recyclerMenu!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
 
-        val swipe = object: MySwipeHelper(requireContext(),recycler_menu!!,200)
+        val swipe = object: MySwipeHelper(requireContext(),recyclerMenu!!,200)
         {
             override fun instantiateMyButton(
                 viewHolder: RecyclerView.ViewHolder,
@@ -108,9 +106,9 @@ class CategoryFragment : Fragment() {
                     Color.parseColor("#333639"),
                     object : IMyButtonCallback {
                         override fun onClick(pos: Int) {
-                            Common.categorySelected = categoryModels[pos];
+                            Common.categorySelected = categoryModels[pos]
 
-                            showDeleteDialog();
+                            showDeleteDialog()
                         }
 
                     }))
@@ -122,9 +120,9 @@ class CategoryFragment : Fragment() {
                     Color.parseColor("#560027"),
                     object : IMyButtonCallback {
                         override fun onClick(pos: Int) {
-                            Common.categorySelected = categoryModels[pos];
+                            Common.categorySelected = categoryModels[pos]
 
-                            showUpdateDialog();
+                            showUpdateDialog()
                         }
 
                     }))
@@ -143,7 +141,7 @@ class CategoryFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_create)
         {
-            showAddDialog();
+            showAddDialog()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -154,7 +152,7 @@ class CategoryFragment : Fragment() {
         builder.setMessage("Do you really want to delete this category?")
 
         builder.setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
-        builder.setPositiveButton("DELETE"){dialogInterface, _ ->
+        builder.setPositiveButton("DELETE"){ _, _ ->
 
             deleteCategory()
 
@@ -173,8 +171,8 @@ class CategoryFragment : Fragment() {
             .child(Common.categorySelected!!.menu_id!!)
             .removeValue()
             .addOnFailureListener{e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
-            .addOnCompleteListener{ task ->
-                categoryViewModel!!.loadCategory()
+            .addOnCompleteListener{
+                categoryViewModel.loadCategory()
                 EventBus.getDefault().postSticky(ToastEvent(Common.ACTION.DELETE,false))
             }
     }
@@ -185,15 +183,15 @@ class CategoryFragment : Fragment() {
         builder.setMessage("Please fill information")
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_category,null)
-        val edt_category_name = itemView.findViewById<View>(R.id.edt_category_name) as EditText
-        img_category = itemView.findViewById<View>(R.id.img_category) as ImageView
+        val edtCategoryName = itemView.findViewById<View>(R.id.edt_category_name) as EditText
+        imgCategory = itemView.findViewById<View>(R.id.img_category) as ImageView
 
         //Set data
-        edt_category_name.setText(Common.categorySelected!!.name)
-        Glide.with(requireContext()).load(Common.categorySelected!!.image).into(img_category)
+        edtCategoryName.setText(Common.categorySelected!!.name)
+        Glide.with(requireContext()).load(Common.categorySelected!!.image).into(imgCategory)
 
         //set event
-        img_category.setOnClickListener{ view ->
+        imgCategory.setOnClickListener{
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
@@ -201,9 +199,9 @@ class CategoryFragment : Fragment() {
         }
 
         builder.setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
-        builder.setPositiveButton("UPDATE"){dialogInterface, _ ->
+        builder.setPositiveButton("UPDATE"){ _, _ ->
             val updateData = HashMap<String,Any>()
-            updateData["name"] = edt_category_name.text.toString()
+            updateData["name"] = edtCategoryName.text.toString()
             if (imageUri != null)
             {
                 dialog.setMessage("Uploading....")
@@ -220,7 +218,7 @@ class CategoryFragment : Fragment() {
                         val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
                         dialog.setMessage("Uploaded $progress")
                     }
-                    .addOnSuccessListener { taskSnapshot ->
+                    .addOnSuccessListener {
                         dialog.dismiss() //Fixed buh
                         imageFolder.downloadUrl.addOnSuccessListener{uri ->
                             updateData["image"] = uri.toString()
@@ -247,8 +245,8 @@ class CategoryFragment : Fragment() {
             .child(Common.categorySelected!!.menu_id!!)
             .updateChildren(updateData)
             .addOnFailureListener{e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
-            .addOnCompleteListener{ task ->
-                categoryViewModel!!.loadCategory()
+            .addOnCompleteListener{
+                categoryViewModel.loadCategory()
                 EventBus.getDefault().postSticky(ToastEvent(Common.ACTION.UPDATE,false))
             }
     }
@@ -259,14 +257,14 @@ class CategoryFragment : Fragment() {
         builder.setMessage("Please fill information")
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_category,null)
-        val edt_category_name = itemView.findViewById<View>(R.id.edt_category_name) as EditText
-        img_category = itemView.findViewById<View>(R.id.img_category) as ImageView
+        val edtCategoryName = itemView.findViewById<View>(R.id.edt_category_name) as EditText
+        imgCategory = itemView.findViewById<View>(R.id.img_category) as ImageView
 
         //Set data
-        Glide.with(requireContext()).load(R.drawable.ic_baseline_image_grey_24).into(img_category)
+        Glide.with(requireContext()).load(R.drawable.ic_baseline_image_grey_24).into(imgCategory)
 
         //set event
-        img_category.setOnClickListener{ view ->
+        imgCategory.setOnClickListener{
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
@@ -274,12 +272,12 @@ class CategoryFragment : Fragment() {
         }
 
         builder.setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
-        builder.setPositiveButton("CREATE"){dialogInterface, _ ->
+        builder.setPositiveButton("CREATE"){ _, _ ->
 
 
             val categoryModel = CategoryModel()
-            categoryModel.name = edt_category_name.text.toString()
-            categoryModel.foods = ArrayList<FoodModel>()
+            categoryModel.name = edtCategoryName.text.toString()
+            categoryModel.foods = ArrayList()
 
 
             if (imageUri != null)
@@ -298,7 +296,7 @@ class CategoryFragment : Fragment() {
                         val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
                         dialog.setMessage("Uploaded $progress")
                     }
-                    .addOnSuccessListener { taskSnapshot ->
+                    .addOnSuccessListener {
                         dialog.dismiss() //dialog, not dialog interface
                         imageFolder.downloadUrl.addOnSuccessListener{uri ->
                             categoryModel.image = uri.toString()
@@ -325,8 +323,8 @@ class CategoryFragment : Fragment() {
             .push()
             .setValue(categoryModel)
             .addOnFailureListener{e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
-            .addOnCompleteListener{ task ->
-                categoryViewModel!!.loadCategory()
+            .addOnCompleteListener{
+                categoryViewModel.loadCategory()
                 EventBus.getDefault().postSticky(ToastEvent(Common.ACTION.CREATE,false))
             }
     }
@@ -338,7 +336,7 @@ class CategoryFragment : Fragment() {
             if (data != null && data.data != null)
             {
                 imageUri = data.data
-                img_category.setImageURI(imageUri)
+                imgCategory.setImageURI(imageUri)
             }
         }
     }

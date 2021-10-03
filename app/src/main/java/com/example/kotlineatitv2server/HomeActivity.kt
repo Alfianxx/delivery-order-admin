@@ -12,7 +12,6 @@ import android.print.PrintManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -22,7 +21,6 @@ import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -37,10 +35,7 @@ import com.example.kotlineatitv2server.model.eventbus.PrintOrderEvent
 import com.example.kotlineatitv2server.model.eventbus.ToastEvent
 import com.example.kotlineatitv2server.remote.IFCMService
 import com.example.kotlineatitv2server.remote.RetrofitFCMClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -60,8 +55,6 @@ import com.karumi.dexter.listener.single.PermissionListener
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Action
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.app_bar_home.*
 import org.greenrobot.eventbus.EventBus
@@ -74,19 +67,20 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.roundToLong
 
 class HomeActivity : AppCompatActivity() {
 
     private val PICK_IMAGE_REQUEST = 7171
     private var menuClick: Int = -1
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var drawerLayout: DrawerLayout;
+    private lateinit var drawerLayout: DrawerLayout
     private lateinit var navController: NavController
     private lateinit var navView: NavigationView
 
-    private var img_upload: ImageView? = null
+    private var imgUpload: ImageView? = null
     private val compositeDisposable = CompositeDisposable()
-    private lateinit var ifcmService: IFCMService
+    private lateinit var iFcmService: IFCMService
     private var imgUri: Uri? = null
     private lateinit var storage: FirebaseStorage
     private var storageReference: StorageReference? = null
@@ -119,45 +113,40 @@ class HomeActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
 
-        navView.setNavigationItemSelectedListener(object :
-            NavigationView.OnNavigationItemSelectedListener {
-            override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-
-                p0.isChecked = true
-                drawerLayout!!.closeDrawers()
-                if (p0.itemId == R.id.nav_sign_out) {
-                    signOut()
-                } else if (p0.itemId == R.id.nav_category) {
-                    if (menuClick != p0.itemId) {
-                        navController.popBackStack() //Clear back stack
-                        navController.navigate(R.id.nav_category)
-                    }
-                } else if (p0.itemId == R.id.nav_shipper) {
-                    if (menuClick != p0.itemId) {
-                        navController.popBackStack() //Clear back stack
-                        navController.navigate(R.id.nav_shipper)
-                    }
-                } else if (p0.itemId == R.id.nav_order) {
-                    if (menuClick != p0.itemId) {
-                        navController.popBackStack() //Clear back stack
-                        navController.navigate(R.id.nav_order)
-                    }
-                } else if (p0.itemId == R.id.nav_news) {
-                    showSendNewsDialog();
-                } else if (p0.itemId == R.id.nav_location) {
-                    showLocationDialog();
+        navView.setNavigationItemSelectedListener { p0 ->
+            p0.isChecked = true
+            drawerLayout.closeDrawers()
+            if (p0.itemId == R.id.nav_sign_out) {
+                signOut()
+            } else if (p0.itemId == R.id.nav_category) {
+                if (menuClick != p0.itemId) {
+                    navController.popBackStack() //Clear back stack
+                    navController.navigate(R.id.nav_category)
                 }
-
-                menuClick = p0!!.itemId
-                return true
+            } else if (p0.itemId == R.id.nav_shipper) {
+                if (menuClick != p0.itemId) {
+                    navController.popBackStack() //Clear back stack
+                    navController.navigate(R.id.nav_shipper)
+                }
+            } else if (p0.itemId == R.id.nav_order) {
+                if (menuClick != p0.itemId) {
+                    navController.popBackStack() //Clear back stack
+                    navController.navigate(R.id.nav_order)
+                }
+            } else if (p0.itemId == R.id.nav_news) {
+                showSendNewsDialog()
+            } else if (p0.itemId == R.id.nav_location) {
+                showLocationDialog()
             }
 
-        })
+            menuClick = p0.itemId
+            true
+        }
 
         //View
         val headerView = navView.getHeaderView(0)
-        val txt_user = headerView.findViewById<View>(R.id.txt_user) as TextView
-        Common.setSpanString("Hey ", Common.currentServerUser!!.name, txt_user)
+        val txtUser = headerView.findViewById<View>(R.id.txt_user) as TextView
+        Common.setSpanString("Hey ", Common.currentServerUser!!.name, txtUser)
 
         menuClick = R.id.nav_category //Default
 
@@ -169,8 +158,8 @@ class HomeActivity : AppCompatActivity() {
         builder.setTitle("update location")
             .setMessage("Do you really want to update your location")
 
-        builder.setNegativeButton("NO", { dialogInterface, i -> dialogInterface.dismiss() })
-        builder.setPositiveButton("YES", { dialogInterface, i ->
+        builder.setNegativeButton("NO") { dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("YES") { _, _ ->
 
             Dexter.withContext(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -214,12 +203,20 @@ class HomeActivity : AppCompatActivity() {
                                         ).show()
                                     }
                                     .addOnFailureListener {
-                                        Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_LONG)
+                                        Toast.makeText(
+                                            this@HomeActivity,
+                                            it.message,
+                                            Toast.LENGTH_LONG
+                                        )
                                             .show()
                                     }
 
                             } else {
-                                Toast.makeText(this@HomeActivity, "location null ! try again !", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    this@HomeActivity,
+                                    "location null ! try again !",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
 
 
@@ -245,18 +242,18 @@ class HomeActivity : AppCompatActivity() {
 
                 }).check()
 
-        })
+        }
         val dialog = builder.create()
         dialog.show()
 
     }
 
     private fun init() {
-        ifcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
+        iFcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference
         subscribeToTopic(Common.getNewOrderTopic())
-        updateToken();
+        updateToken()
 
         dialog = AlertDialog.Builder(this)
             .setCancelable(false)
@@ -271,30 +268,30 @@ class HomeActivity : AppCompatActivity() {
         val itemView = LayoutInflater.from(this).inflate(R.layout.layout_news_system, null)
 
         //Views
-        val edt_title = itemView.findViewById<View>(R.id.edt_title) as EditText
-        val edt_content = itemView.findViewById<View>(R.id.edt_content) as EditText
-        val edt_link = itemView.findViewById<View>(R.id.edt_link) as EditText
+        val edtTitle = itemView.findViewById<View>(R.id.edt_title) as EditText
+        val edtContent = itemView.findViewById<View>(R.id.edt_content) as EditText
+        val edtLink = itemView.findViewById<View>(R.id.edt_link) as EditText
 
-        val rdi_none = itemView.findViewById<View>(R.id.rdi_none) as RadioButton
-        val rdi_link = itemView.findViewById<View>(R.id.rdi_link) as RadioButton
-        val rdi_upload = itemView.findViewById<View>(R.id.rdi_image) as RadioButton
+        val rdiNone = itemView.findViewById<View>(R.id.rdi_none) as RadioButton
+        val rdiLink = itemView.findViewById<View>(R.id.rdi_link) as RadioButton
+        val rdiUpload = itemView.findViewById<View>(R.id.rdi_image) as RadioButton
 
-        img_upload = itemView.findViewById(R.id.img_upload) as ImageView
+        imgUpload = itemView.findViewById(R.id.img_upload) as ImageView
 
         //Event
-        rdi_none.setOnClickListener {
-            edt_link.visibility = View.GONE
-            img_upload!!.visibility = View.GONE
+        rdiNone.setOnClickListener {
+            edtLink.visibility = View.GONE
+            imgUpload!!.visibility = View.GONE
         }
-        rdi_link.setOnClickListener {
-            edt_link.visibility = View.VISIBLE
-            img_upload!!.visibility = View.GONE
+        rdiLink.setOnClickListener {
+            edtLink.visibility = View.VISIBLE
+            imgUpload!!.visibility = View.GONE
         }
-        rdi_upload.setOnClickListener {
-            edt_link.visibility = View.GONE
-            img_upload!!.visibility = View.VISIBLE
+        rdiUpload.setOnClickListener {
+            edtLink.visibility = View.GONE
+            imgUpload!!.visibility = View.VISIBLE
         }
-        img_upload!!.setOnClickListener {
+        imgUpload!!.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
@@ -305,44 +302,44 @@ class HomeActivity : AppCompatActivity() {
         }
 
         builder.setView(itemView)
-        builder.setNegativeButton("CANCEL", { dialogInterface, i -> dialogInterface.dismiss() })
-        builder.setPositiveButton("SEND", { dialogInterface, i ->
-            if (rdi_none.isChecked)
-                sendNews(edt_title.text.toString(), edt_content.text.toString())
-            else if (rdi_link.isChecked)
+        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("SEND") { _, _ ->
+            if (rdiNone.isChecked)
+                sendNews(edtTitle.text.toString(), edtContent.text.toString())
+            else if (rdiLink.isChecked)
                 sendNews(
-                    edt_title.text.toString(),
-                    edt_content.text.toString(),
-                    edt_link.text.toString()
+                    edtTitle.text.toString(),
+                    edtContent.text.toString(),
+                    edtLink.text.toString()
                 )
-            else if (rdi_upload.isChecked) {
+            else if (rdiUpload.isChecked) {
                 if (imgUri != null) {
                     val dialog = AlertDialog.Builder(this).setMessage("Uploading...").create()
                     dialog.show()
-                    val file_name = UUID.randomUUID().toString()
-                    val newsImage = storageReference!!.child("news/$file_name")
+                    val fileName = UUID.randomUUID().toString()
+                    val newsImage = storageReference!!.child("news/$fileName")
                     newsImage.putFile(imgUri!!)
                         .addOnFailureListener { e: Exception ->
                             dialog.dismiss()
                             Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
-                        }.addOnSuccessListener { taskSnapshot ->
+                        }.addOnSuccessListener {
                             dialog.dismiss()
                             newsImage.downloadUrl.addOnSuccessListener { uri ->
                                 sendNews(
-                                    edt_title.text.toString(),
-                                    edt_content.text.toString(),
+                                    edtTitle.text.toString(),
+                                    edtContent.text.toString(),
                                     uri.toString()
                                 )
                             }
                         }.addOnProgressListener { taskSnapshot ->
                             val progress =
-                                Math.round(100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount)
+                                (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).roundToLong()
                                     .toDouble()
                             dialog.setMessage(StringBuilder("Uploading: $progress %"))
                         }
                 }
             }
-        })
+        }
         val dialog = builder.create()
         dialog.show()
 
@@ -359,7 +356,7 @@ class HomeActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this).setMessage("Waiting...").create()
         dialog.show()
         compositeDisposable.addAll(
-            ifcmService.sendNotification(fcmSendData)
+            iFcmService.sendNotification(fcmSendData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ t: FCMResponse? ->
@@ -386,7 +383,7 @@ class HomeActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this).setMessage("Waiting...").create()
         dialog.show()
         compositeDisposable.addAll(
-            ifcmService.sendNotification(fcmSendData)
+            iFcmService.sendNotification(fcmSendData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ t: FCMResponse? ->
@@ -407,7 +404,7 @@ class HomeActivity : AppCompatActivity() {
     private fun checkOpenOrderFragment() {
         val isOpenNewOrder = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_NEW_ORDER, false)
         if (isOpenNewOrder) {
-            navController.popBackStack();
+            navController.popBackStack()
             navController.navigate(R.id.nav_order)
             menuClick = R.id.nav_order
         }
@@ -423,7 +420,7 @@ class HomeActivity : AppCompatActivity() {
                 ).show()
             }
             .addOnSuccessListener { instanceIdResult ->
-                Log.d("MYTOKEN", instanceIdResult.token)
+                Log.d("aan", instanceIdResult.token)
                 Common.updateToken(this@HomeActivity, instanceIdResult.token, true, false)
             }
     }
@@ -446,11 +443,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun signOut() {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle("Sign out")
             .setMessage("Do you really want to exit?")
-            .setNegativeButton("CANCEL", { dialogInterface, _ -> dialogInterface.dismiss() })
-            .setPositiveButton("OK") { dialogInterface, _ ->
+            .setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setPositiveButton("OK") { _, _ ->
                 Common.foodSelected = null
                 Common.categorySelected = null
                 Common.currentServerUser = null
@@ -481,7 +478,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        EventBus.getDefault().removeAllStickyEvents(); //Fixed
+        EventBus.getDefault().removeAllStickyEvents() //Fixed
         EventBus.getDefault().unregister(this)
         compositeDisposable.clear()
         super.onStop()
@@ -491,7 +488,7 @@ class HomeActivity : AppCompatActivity() {
     fun onCategoryClick(event: CategoryClick) {
         if (event.isSuccess) {
             if (menuClick != R.id.nav_food_list) {
-                navController!!.navigate(R.id.nav_food_list)
+                navController.navigate(R.id.nav_food_list)
                 menuClick = R.id.nav_food_list
             }
         }
@@ -501,20 +498,24 @@ class HomeActivity : AppCompatActivity() {
     fun onChangeMenuEvent(event: ChangeMenuClick) {
         if (!event.isFromFoodList) {
             //Clear
-            navController!!.popBackStack(R.id.nav_category, true)
-            navController!!.navigate(R.id.nav_category)
+            navController.popBackStack(R.id.nav_category, true)
+            navController.navigate(R.id.nav_category)
         }
         menuClick = -1
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onToastEvent(event: ToastEvent) {
-        if (event.action == Common.ACTION.CREATE) {
-            Toast.makeText(this, "Create Success", Toast.LENGTH_SHORT).show()
-        } else if (event.action == Common.ACTION.UPDATE) {
-            Toast.makeText(this, "Update Success", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Delete Success", Toast.LENGTH_SHORT).show()
+        when (event.action) {
+            Common.ACTION.CREATE -> {
+                Toast.makeText(this, "Create Success", Toast.LENGTH_SHORT).show()
+            }
+            Common.ACTION.UPDATE -> {
+                Toast.makeText(this, "Update Success", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                Toast.makeText(this, "Delete Success", Toast.LENGTH_SHORT).show()
+            }
         }
         EventBus.getDefault().postSticky(ChangeMenuClick(event.isBackFromFoodList))
     }
@@ -524,7 +525,7 @@ class HomeActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
             if (data != null && data.data != null) {
                 imgUri = data.data
-                img_upload!!.setImageURI(imgUri)
+                imgUpload!!.setImageURI(imgUri)
             }
         }
     }
@@ -536,7 +537,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun createPDFFile(path: String, orderModel: OrderModel) {
-        dialog!!.show()
+        dialog.show()
         if (File(path).exists())
             File(path).delete()
         try {
@@ -593,23 +594,23 @@ class HomeActivity : AppCompatActivity() {
             )
             PDFUtils.addLineSeparator(document)
 
-            //Product Detai;
+            //Product Detail
             PDFUtils.addLineSpace(document)
             PDFUtils.addNewItem(document, "Product Detail", Element.ALIGN_CENTER, titleFont)
             PDFUtils.addLineSeparator(document)
 
             //Use RxJava, fetch image from url and add to PDF
             Observable.fromIterable(orderModel.cartItemList)
-                .flatMap({ cartItem: CartItem ->
+                .flatMap { cartItem: CartItem ->
                     Common.getBitmapFromUrl(
                         this@HomeActivity,
                         cartItem,
                         document
                     )
-                })
+                }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Consumer { cartItem -> //on next
+                .subscribe({ cartItem -> //on next
 
                     //Each item we will add detail
                     //Food Name
@@ -654,11 +655,11 @@ class HomeActivity : AppCompatActivity() {
                     PDFUtils.addLineSeparator(document)
 
 
-                }, Consumer { t -> //On Error
+                }, { t -> //On Error
                     dialog.dismiss()
                     Toast.makeText(this@HomeActivity, t.message!!, Toast.LENGTH_SHORT).show()
                 },
-                    Action { //On Complete
+                    { //On Complete
 
                         //when all product detail is wrote, we will append total
                         PDFUtils.addLineSpace(document)
@@ -673,7 +674,7 @@ class HomeActivity : AppCompatActivity() {
 
                         //Close
                         document.close()
-                        dialog!!.dismiss()
+                        dialog.dismiss()
                         Toast.makeText(this@HomeActivity, "Success", Toast.LENGTH_SHORT).show()
                         printPDF()
 

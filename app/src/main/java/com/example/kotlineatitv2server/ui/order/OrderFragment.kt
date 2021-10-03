@@ -18,7 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -59,17 +59,17 @@ import org.greenrobot.eventbus.ThreadMode
 
 class OrderFragment: Fragment(), IShipperLoadCallbackListener {
     private val compositeDisposable = CompositeDisposable()
-    lateinit var ifcmService: IFCMService
-    lateinit var recycler_order:RecyclerView
-    lateinit var layoutAnimationController: LayoutAnimationController
+    lateinit var iFcmService: IFCMService
+    lateinit var recyclerOrder:RecyclerView
+    private lateinit var layoutAnimationController: LayoutAnimationController
 
-    lateinit var orderViewModel: OrderViewModel
+    private lateinit var orderViewModel: OrderViewModel
 
     private var adapter : MyOrderAdapter?=null
 
-    var myShipperSelectedAdapter: MyShipperSelectedAdapter? = null
+    private var myShipperSelectedAdapter: MyShipperSelectedAdapter? = null
     lateinit var shipperLoadCallbackListener:IShipperLoadCallbackListener
-    var recycler_shipper:RecyclerView?=null
+    private var recyclerShipper:RecyclerView?=null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,17 +79,17 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         val root = inflater.inflate(R.layout.fragment_order,container,false)
         initViews(root)
 
-        orderViewModel = ViewModelProviders.of(this).get(OrderViewModel::class.java)
+        orderViewModel = ViewModelProvider(this).get(OrderViewModel::class.java)
 
-        orderViewModel!!.messageError.observe(viewLifecycleOwner, Observer { s ->
+        orderViewModel.messageError.observe(viewLifecycleOwner, Observer { s ->
             Toast.makeText(context,s,Toast.LENGTH_SHORT).show()
         })
-        orderViewModel!!.getOrderModelList().observe(viewLifecycleOwner, Observer { orderList ->
+        orderViewModel.getOrderModelList().observe(viewLifecycleOwner, Observer { orderList ->
             if (orderList != null)
             {
                 adapter = MyOrderAdapter(requireContext(),orderList.toMutableList())
-                recycler_order.adapter = adapter
-                recycler_order.layoutAnimation = layoutAnimationController
+                recyclerOrder.adapter = adapter
+                recyclerOrder.layoutAnimation = layoutAnimationController
 
                updateTextCounter()
             }
@@ -102,13 +102,13 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
 
         shipperLoadCallbackListener = this
 
-        ifcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
+        iFcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
 
         setHasOptionsMenu(true)
 
-        recycler_order = root.findViewById(R.id.recycler_order) as RecyclerView
-        recycler_order.setHasFixedSize(true)
-        recycler_order.layoutManager = LinearLayoutManager(context)
+        recyclerOrder = root.findViewById(R.id.recycler_order) as RecyclerView
+        recyclerOrder.setHasFixedSize(true)
+        recyclerOrder.layoutManager = LinearLayoutManager(context)
 
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(context,R.anim.layout_item_from_left)
 
@@ -116,7 +116,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
 
-        val swipe = object: MySwipeHelper(requireContext(), recycler_order,width/6)
+        val swipe = object: MySwipeHelper(requireContext(), recyclerOrder,width/6)
         {
             override fun instantiateMyButton(
                 viewHolder: RecyclerView.ViewHolder,
@@ -130,7 +130,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                     object : IMyButtonCallback {
                         override fun onClick(pos: Int) {
 
-                            Dexter.withActivity(activity)
+                            Dexter.withContext(activity)
                                 .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                 .withListener(object:PermissionListener{
                                     override fun onPermissionGranted(response: PermissionGrantedResponse?) {
@@ -171,7 +171,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                     object : IMyButtonCallback {
                         override fun onClick(pos: Int) {
 
-                            val orderModel = (recycler_order.adapter as MyOrderAdapter)
+                            val orderModel = (recyclerOrder.adapter as MyOrderAdapter)
                                 .getItemAtPosition(pos)
                             if (orderModel.orderStatus == 1) //Shipping
                             {
@@ -199,16 +199,15 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                     object : IMyButtonCallback {
                         override fun onClick(pos: Int) {
 
-                            Dexter.withActivity(activity)
-                                .withPermission(android.Manifest.permission.CALL_PHONE)
+                            Dexter.withContext(activity)
+                                .withPermission(Manifest.permission.CALL_PHONE)
                                 .withListener(object:PermissionListener{
                                     override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                                         val orderModel = adapter!!.getItemAtPosition(pos)
                                         val intent = Intent()
-                                        intent.setAction(Intent.ACTION_DIAL)
-                                        intent.setData(
-                                            Uri.parse(StringBuilder("tel: ")
-                                                .append(orderModel.userPhone).toString()))
+                                        intent.action = Intent.ACTION_DIAL
+                                        intent.data = Uri.parse(StringBuilder("tel: ")
+                                            .append(orderModel.userPhone).toString())
                                         startActivity(intent)
                                     }
 
@@ -243,13 +242,13 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                             val builder = AlertDialog.Builder(context!!)
                                 .setTitle("Delete")
                                 .setMessage("Do you really want to delete this order?")
-                                .setNegativeButton("CANCEL"){dialogInterface, i -> dialogInterface.dismiss() }
-                                .setPositiveButton("DELETE"){dialogInterface, i ->
+                                .setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
+                                .setPositiveButton("DELETE"){ dialogInterface, _ ->
                                     FirebaseDatabase.getInstance()
                                         .getReference(Common.RESTAURANT_REF)
                                         .child(Common.currentServerUser!!.restaurant!!)
                                         .child(Common.ORDER_REF)
-                                        .child(orderModel!!.key!!)
+                                        .child(orderModel.key!!)
                                         .removeValue()
                                         .addOnFailureListener {
                                             Toast.makeText(context!!,""+it.message,Toast.LENGTH_SHORT).show()
@@ -267,10 +266,10 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                             val dialog = builder.create()
                             dialog.show()
 
-                            val btn_negative = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
-                            btn_negative.setTextColor(Color.LTGRAY)
-                            val btn_positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                            btn_positive.setTextColor(Color.RED)
+                            val btnNegative = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+                            btnNegative.setTextColor(Color.LTGRAY)
+                            val btnPositive = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                            btnPositive.setTextColor(Color.RED)
 
 
                         }
@@ -299,76 +298,75 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
     }
 
     private fun showEditDialog(orderModel: OrderModel, pos: Int) {
-        var layout_dialog:View?=null
-        var builder:AlertDialog.Builder?=null
+        val layoutDialog: View?
+        val builder: AlertDialog.Builder?
 
-        var rdi_shipping:RadioButton?=null
-        var rdi_cancelled:RadioButton?=null
-        var rdi_shipped:RadioButton?=null
-        var rdi_delete:RadioButton?=null
-        var rdi_restore_placed:RadioButton?=null
+        var rdiShipping:RadioButton?=null
+        var rdiCancelled:RadioButton?=null
+        var rdiShipped:RadioButton?=null
+        var rdiDelete:RadioButton?=null
+        var rdiRestorePlaced:RadioButton?=null
 
-        if (orderModel.orderStatus == -1)
-        {
-            layout_dialog = LayoutInflater.from(requireContext())
-                .inflate(R.layout.layout_dialog_cancelled,null)
+        when (orderModel.orderStatus) {
+            -1 -> {
+                layoutDialog = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.layout_dialog_cancelled,null)
 
 
-            builder = AlertDialog.Builder(requireContext())
-                .setView(layout_dialog)
+                builder = AlertDialog.Builder(requireContext())
+                    .setView(layoutDialog)
 
-            rdi_delete = layout_dialog.findViewById<View>(R.id.rdi_delete) as RadioButton
-            rdi_restore_placed = layout_dialog.findViewById<View>(R.id.rdi_restore_placed) as RadioButton
+                rdiDelete = layoutDialog.findViewById<View>(R.id.rdi_delete) as RadioButton
+                rdiRestorePlaced = layoutDialog.findViewById<View>(R.id.rdi_restore_placed) as RadioButton
 
-        }
-        else if (orderModel.orderStatus == 0)
-        {
-            layout_dialog = LayoutInflater.from(requireContext())
-                .inflate(R.layout.layout_dialog_shipping,null)
-            recycler_shipper = layout_dialog.findViewById(R.id.recycler_shipper) as RecyclerView //Add when shipping order status == 0
-            builder = AlertDialog.Builder(requireContext(),
-                android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
-                .setView(layout_dialog)
+            }
+            0 -> {
+                layoutDialog = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.layout_dialog_shipping,null)
+                recyclerShipper = layoutDialog.findViewById(R.id.recycler_shipper) as RecyclerView //Add when shipping order status == 0
+                builder = AlertDialog.Builder(requireContext(),
+                    android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
+                    .setView(layoutDialog)
 
-            rdi_shipping = layout_dialog.findViewById<View>(R.id.rdi_shipping) as RadioButton
-            rdi_cancelled = layout_dialog.findViewById<View>(R.id.rdi_cancelled) as RadioButton
-        }
-        else
-        {
-            layout_dialog = LayoutInflater.from(requireContext())
-                .inflate(R.layout.layout_dialog_shipped,null)
-            builder = AlertDialog.Builder(requireContext())
-                .setView(layout_dialog)
+                rdiShipping = layoutDialog.findViewById<View>(R.id.rdi_shipping) as RadioButton
+                rdiCancelled = layoutDialog.findViewById<View>(R.id.rdi_cancelled) as RadioButton
+            }
+            else -> {
+                layoutDialog = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.layout_dialog_shipped,null)
+                builder = AlertDialog.Builder(requireContext())
+                    .setView(layoutDialog)
 
-            rdi_shipped = layout_dialog.findViewById<View>(R.id.rdi_shipped) as RadioButton
-            rdi_cancelled = layout_dialog.findViewById<View>(R.id.rdi_cancelled) as RadioButton
+                rdiShipped = layoutDialog.findViewById<View>(R.id.rdi_shipped) as RadioButton
+                rdiCancelled = layoutDialog.findViewById<View>(R.id.rdi_cancelled) as RadioButton
+            }
         }
 
         //View
-        val btn_ok = layout_dialog.findViewById<View>(R.id.btn_ok) as Button
-        val btn_cancel = layout_dialog.findViewById<View>(R.id.btn_cancel) as Button
+        val btnOk = layoutDialog.findViewById<View>(R.id.btn_ok) as Button
+        val btnCancel = layoutDialog.findViewById<View>(R.id.btn_cancel) as Button
 
 
 
 
 
 
-        val txt_status = layout_dialog.findViewById<View>(R.id.txt_status) as TextView
+        val txtStatus = layoutDialog.findViewById<View>(R.id.txt_status) as TextView
 
         //Set data
-        txt_status.setText(StringBuilder("Order Status(")
+        txtStatus.text = StringBuilder("Order Status(")
             .append(Common.convertStatusToString(orderModel.orderStatus))
-            .append(")"))
+            .append(")")
 
         //Create Dialog
         val dialog = builder.create()
 
         if (orderModel.orderStatus == 0) //shipping
-            loadShipperList(pos,orderModel,dialog,btn_ok,btn_cancel,
-            rdi_shipping,rdi_shipped,rdi_cancelled,rdi_delete,rdi_restore_placed)
+            loadShipperList(pos,orderModel,dialog,btnOk,btnCancel,
+            rdiShipping,rdiShipped,rdiCancelled,rdiDelete,rdiRestorePlaced)
         else
-            showDialog(pos,orderModel,dialog,btn_ok,btn_cancel,
-                rdi_shipping,rdi_shipped,rdi_cancelled,rdi_delete,rdi_restore_placed)
+            showDialog(pos,orderModel,dialog,btnOk,btnCancel,
+                rdiShipping,rdiShipped,rdiCancelled,rdiDelete,rdiRestorePlaced)
 
        
     }
@@ -392,7 +390,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         val shipperActive = shipperRef.orderByChild("active").equalTo(true)
         shipperActive.addListenerForSingleValueEvent(object:ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
-                shipperLoadCallbackListener.onShipperLoadFailed(p0!!.message)
+                shipperLoadCallbackListener.onShipperLoadFailed(p0.message)
             }
 
             override fun onDataChange(p0: DataSnapshot) {
@@ -439,7 +437,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
             else if (rdiShipping != null && rdiShipping.isChecked)
             {
 
-                var shipperModel:ShipperModel?=null
+                val shipperModel: ShipperModel?
                 if (myShipperSelectedAdapter != null)
                 {
                     shipperModel = myShipperSelectedAdapter!!.selectedShipper
@@ -487,7 +485,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
             .getReference(Common.RESTAURANT_REF)
             .child(Common.currentServerUser!!.restaurant!!)
             .child(Common.SHIPPING_ORDER_REF)
-            .child(orderModel!!.key!!) //change push() to key()
+            .child(orderModel.key!!) //change push() to key()
             .setValue(shippingOrder)
             .addOnFailureListener { e:Exception ->
                 dialog.dismiss()
@@ -511,15 +509,15 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                                 if (p0.exists())
                                 {
                                     val tokenModel = p0.getValue(TokenModel::class.java)
-                                    val notiData = HashMap<String,String>()
-                                    notiData.put(Common.NOTI_TITLE,"You have new Order need ship");
-                                    notiData.put(Common.NOTI_CONTENT,StringBuilder("Your have new order need ship to ")
-                                        .append(orderModel.userPhone).toString())
+                                    val notifData = HashMap<String,String>()
+                                    notifData[Common.NOTI_TITLE] = "You have new Order need ship"
+                                    notifData[Common.NOTI_CONTENT] = StringBuilder("Your have new order need ship to ")
+                                        .append(orderModel.userPhone).toString()
 
-                                    val sendData = FCMSendData(tokenModel!!.token!!,notiData)
+                                    val sendData = FCMSendData(tokenModel!!.token!!,notifData)
 
                                     compositeDisposable.add(
-                                        ifcmService.sendNotification(sendData)
+                                        iFcmService.sendNotification(sendData)
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe({ fcmResponse ->
@@ -564,7 +562,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                 .child(Common.ORDER_REF)
                 .child(orderModel.key!!)
                 .removeValue()
-                .addOnFailureListener { throawable -> Toast.makeText(requireContext(),""+throawable.message,
+                .addOnFailureListener { throwable -> Toast.makeText(requireContext(),""+throwable.message,
                     Toast.LENGTH_SHORT).show() }
                 .addOnSuccessListener {
                     adapter!!.removeItem(pos)
@@ -583,16 +581,16 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
     private fun updateOrder(pos: Int, orderModel: OrderModel, status: Int) {
         if (!TextUtils.isEmpty(orderModel.key))
         {
-            val update_data = HashMap<String,Any>()
-            update_data.put("orderStatus",status)
+            val updateData = HashMap<String,Any>()
+            updateData["orderStatus"] = status
 
             FirebaseDatabase.getInstance()
                 .getReference(Common.RESTAURANT_REF)
                 .child(Common.currentServerUser!!.restaurant!!)
                 .child(Common.ORDER_REF)
                 .child(orderModel.key!!)
-                .updateChildren(update_data)
-                .addOnFailureListener { throawable -> Toast.makeText(requireContext(),""+throawable.message,
+                .updateChildren(updateData)
+                .addOnFailureListener { throwable -> Toast.makeText(requireContext(),""+throwable.message,
                 Toast.LENGTH_SHORT).show() }
                 .addOnSuccessListener {
 
@@ -613,24 +611,24 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                                 if (p0.exists())
                                 {
                                     val tokenModel = p0.getValue(TokenModel::class.java)
-                                    val notiData = HashMap<String,String>()
-                                    notiData.put(Common.NOTI_TITLE,"Your order was update");
-                                    notiData.put(Common.NOTI_CONTENT,StringBuilder("Your order ")
+                                    val notifData = HashMap<String,String>()
+                                    notifData[Common.NOTI_TITLE] = "Your order was update"
+                                    notifData[Common.NOTI_CONTENT] = StringBuilder("Your order ")
                                         .append(orderModel.key)
                                         .append(" was update to ")
-                                        .append(Common.convertStatusToString(status)).toString())
+                                        .append(Common.convertStatusToString(status)).toString()
 
-                                    val sendData = FCMSendData(tokenModel!!.token!!,notiData)
+                                    val sendData = FCMSendData(tokenModel!!.token!!,notifData)
 
                                     compositeDisposable.add(
-                                        ifcmService.sendNotification(sendData)
+                                        iFcmService.sendNotification(sendData)
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe({ fcmResponse ->
                                                 dialog.dismiss()
                                                 if (fcmResponse.success == 1)
                                                 {
-                                                    Toast.makeText(context,"Update order successfull",Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context,"Update order successfully",Toast.LENGTH_SHORT).show()
                                                 }
                                                 else
                                                 {
@@ -665,9 +663,9 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
     }
 
     private fun updateTextCounter() {
-        txt_order_filter.setText(StringBuilder("Orders (")
+        txt_order_filter.text = StringBuilder("Orders (")
             .append(adapter!!.itemCount)
-            .append(")"))
+            .append(")")
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -675,14 +673,12 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_filter)
-        {
+        return if (item.itemId == R.id.action_filter) {
             val bottomSheet = BottomSheetOrderFragment.instance
             bottomSheet!!.show(requireActivity().supportFragmentManager,"OrderList")
-            return true
-        }
-        else
-            return super.onOptionsItemSelected(item)
+            true
+        } else
+            super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {
@@ -730,14 +726,14 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         rdi_delete: RadioButton?,
         rdi_restore_placed: RadioButton?
     ) {
-        if (recycler_shipper != null)
+        if (recyclerShipper != null)
         {
-            recycler_shipper!!.setHasFixedSize(true)
+            recyclerShipper!!.setHasFixedSize(true)
             val layoutManager = LinearLayoutManager(context)
-            recycler_shipper!!.layoutManager = layoutManager
-            recycler_shipper!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
+            recyclerShipper!!.layoutManager = layoutManager
+            recyclerShipper!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
             myShipperSelectedAdapter = MyShipperSelectedAdapter(requireContext(),shipperList!!)
-            recycler_shipper!!.adapter = myShipperSelectedAdapter
+            recyclerShipper!!.adapter = myShipperSelectedAdapter
         }
 
         showDialog(pos,orderModel!!,dialog!!,ok!!,cancel!!,rdi_shipping,rdi_shipped,rdi_cancelled,rdi_delete,rdi_restore_placed)

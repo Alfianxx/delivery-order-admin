@@ -6,14 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.kotlineatitv2server.R
 import com.example.kotlineatitv2server.callback.IRecyclerItemClickListener
 import com.example.kotlineatitv2server.common.Common
 import com.example.kotlineatitv2server.model.FoodModel
-import org.greenrobot.eventbus.EventBus
 
 class MyFoodListAdapter (internal var context: Context,
                          internal var foodList: List<FoodModel>) :
@@ -22,14 +20,14 @@ class MyFoodListAdapter (internal var context: Context,
 
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Glide.with(context).load(foodList.get(position).image).into(holder.img_food_image!!)
-        holder.txt_food_name!!.setText(foodList.get(position).name)
-        holder.txt_food_price!!.setText(StringBuilder("$").append(foodList.get(position).price.toString()))
+        Glide.with(context).load(foodList[position].image).into(holder.imgFoodImage!!)
+        holder.txtFoodName!!.text = foodList[position].name
+        holder.txtFoodPrice!!.text = StringBuilder("$").append(foodList[position].price.toString())
 
         //Event
         holder.setListener(object: IRecyclerItemClickListener {
             override fun onItemClick(view: View, pos: Int) {
-                Common.foodSelected = foodList.get(pos)
+                Common.foodSelected = foodList[pos]
                 Common.foodSelected!!.key = pos.toString()
 
             }
@@ -54,21 +52,19 @@ class MyFoodListAdapter (internal var context: Context,
     }
 
     fun getItemAtPosition(pos: Int): FoodModel {
-        return foodList.get(pos)
+        return foodList[pos]
     }
 
 
     inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
 
-        var txt_food_name: TextView?=null
-        var txt_food_price: TextView?=null
+        var txtFoodName: TextView?=null
+        var txtFoodPrice: TextView?=null
 
-        var img_food_image: ImageView?=null
-        var img_fav: ImageView?=null
-        var img_cart: ImageView?=null
+        var imgFoodImage: ImageView?=null
 
-        internal var listener: IRecyclerItemClickListener?=null
+        private var listener: IRecyclerItemClickListener?=null
 
         fun setListener(listener: IRecyclerItemClickListener)
         {
@@ -76,9 +72,9 @@ class MyFoodListAdapter (internal var context: Context,
         }
 
         init{
-            txt_food_name = itemView.findViewById(R.id.txt_food_name) as TextView
-            txt_food_price = itemView.findViewById(R.id.txt_food_price) as TextView
-            img_food_image = itemView.findViewById(R.id.img_food_image) as ImageView
+            txtFoodName = itemView.findViewById(R.id.txt_food_name) as TextView
+            txtFoodPrice = itemView.findViewById(R.id.txt_food_price) as TextView
+            imgFoodImage = itemView.findViewById(R.id.img_food_image) as ImageView
 
 
             itemView.setOnClickListener(this)

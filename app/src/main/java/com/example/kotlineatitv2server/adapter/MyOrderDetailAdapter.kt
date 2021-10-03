@@ -15,27 +15,17 @@ import com.example.kotlineatitv2server.model.SizeModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class MyOrderDetailAdapter(internal var context: Context, internal var cartItemList:MutableList<CartItem>):RecyclerView.Adapter<MyOrderDetailAdapter.MyViewHolder>(){
+class MyOrderDetailAdapter(internal var context: Context, private var cartItemList:MutableList<CartItem>):RecyclerView.Adapter<MyOrderDetailAdapter.MyViewHolder>(){
 
-    val gson:Gson = Gson()
+    private val gson:Gson = Gson()
 
     class MyViewHolder(itemView: View):RecyclerView.ViewHolder(itemView)
     {
-        var txt_food_name:TextView?=null
-        var txt_food_size:TextView?=null
-        var txt_food_addon:TextView?=null
-        var txt_food_quantity:TextView?=null
-        var img_food_image:ImageView?=null
-
-        init {
-            img_food_image = itemView.findViewById(R.id.img_food_image) as ImageView
-            txt_food_name = itemView.findViewById(R.id.txt_food_name) as TextView
-            txt_food_size = itemView.findViewById(R.id.txt_size) as TextView
-            txt_food_addon = itemView.findViewById(R.id.txt_food_add_on) as TextView
-            txt_food_quantity = itemView.findViewById(R.id.txt_food_quantity) as TextView
-
-
-        }
+        var txtFoodName:TextView = itemView.findViewById(R.id.txt_food_name)
+        var txtFoodSize:TextView = itemView.findViewById(R.id.txt_size)
+        var txtFoodAddon:TextView = itemView.findViewById(R.id.txt_food_add_on)
+        var txtFoodQuantity:TextView = itemView.findViewById(R.id.txt_food_quantity)
+        var imgFoodImage:ImageView = itemView.findViewById(R.id.img_food_image)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -49,17 +39,17 @@ class MyOrderDetailAdapter(internal var context: Context, internal var cartItemL
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         Glide.with(context).load(cartItemList[position].foodImage)
-            .into(holder.img_food_image!!)
-        holder.txt_food_name!!.setText(StringBuilder().append(cartItemList[position].foodName))
-        holder.txt_food_quantity!!.setText(StringBuilder("Quantity:  ").append(cartItemList[position].foodQuantity))
+            .into(holder.imgFoodImage)
+        holder.txtFoodName.text = StringBuilder().append(cartItemList[position].foodName)
+        holder.txtFoodQuantity.text = StringBuilder("Quantity:  ").append(cartItemList[position].foodQuantity)
 
         //Fix crash
         if (cartItemList[position].foodSize
                 .equals("Default"))
-            holder.txt_food_size!!.setText(StringBuilder("Size: Default"))
+            holder.txtFoodSize.text = StringBuilder("Size: Default")
         else{
             val sizeModel = gson.fromJson<SizeModel>(cartItemList[position].foodSize,SizeModel::class.java)
-            holder.txt_food_size!!.setText(StringBuilder("Size: ").append(sizeModel.name))
+            holder.txtFoodSize.text = StringBuilder("Size: ").append(sizeModel.name)
         }
 
         if (!cartItemList[position].foodAddon.equals("Default"))
@@ -67,16 +57,14 @@ class MyOrderDetailAdapter(internal var context: Context, internal var cartItemL
             val addonModels : List<AddonModel> = gson.fromJson(cartItemList[position].foodAddon,
             object:TypeToken<List<AddonModel?>?>(){}.type)
             val addonString = StringBuilder()
-            if (addonModels != null)
-            {
-                for(addonModel in addonModels) addonString.append(addonModel.name).append(",")
-                addonString.delete(addonString.length-1,addonString.length) //Remove last ","
-                holder.txt_food_addon!!.setText(StringBuilder("Addon: ").append(addonString))
-            }
+
+            for(addonModel in addonModels) addonString.append(addonModel.name).append(",")
+            addonString.delete(addonString.length-1,addonString.length) //Remove last ","
+            holder.txtFoodAddon.text = StringBuilder("Addon: ").append(addonString)
         }
         else
         {
-            holder.txt_food_addon!!.setText(StringBuilder("Addon: Default"))
+            holder.txtFoodAddon.text = StringBuilder("Addon: Default")
         }
     }
 

@@ -34,40 +34,39 @@ import com.itextpdf.text.Image
 import io.reactivex.Observable
 import java.io.ByteArrayOutputStream
 import java.io.File
+import kotlin.math.abs
+import kotlin.math.atan
 
 object Common {
-    val LOCATION_REF: String= "Location"
-    val FILE_PRINT: String ="last_order_print"
-    val CHAT_DETAIL_REF: String="ChatDetail"
-    val KEY_CHAT_SENDER: String?="CHAT_SENDER"
-    val KEY_CHAT_ROOM_ID: String?="CHAT_ROOM_ID"
-    val CHAT_REF: String= "Chat"
-    val RESTAURANT_REF: String= "Restaurant" //same as name reference in firebase
-    val IMAGE_URL: String="IMAGE_URL"
-    val IS_SEND_IMAGE: String="IS_SEND_IMAGE"
+    const val LOCATION_REF: String= "Location"
+    const val FILE_PRINT: String ="last_order_print"
+    const val CHAT_DETAIL_REF: String="ChatDetail"
+    const val KEY_CHAT_SENDER: String ="CHAT_SENDER"
+    const val KEY_CHAT_ROOM_ID: String ="CHAT_ROOM_ID"
+    const val CHAT_REF: String= "Chat"
+    const val RESTAURANT_REF: String= "Restaurant" //same as name reference in firebase
+    const val IMAGE_URL: String="IMAGE_URL"
+    const val IS_SEND_IMAGE: String="IS_SEND_IMAGE"
 
-    val MOST_POPULAR: String="MostPopular"
-
-    val BEST_DEALS: String="BestDeals"
-    val IS_OPEN_ACTIVITY_NEW_ORDER: String?="IsOpenActivityOrder    "
+    const val IS_OPEN_ACTIVITY_NEW_ORDER: String ="IsOpenActivityOrder    "
     var currentOrderSelected: OrderModel?=null
-    val SHIPPING_ORDER_REF: String="ShippingOrder"
-    val SHIPPER_REF: String="Shipper"
-    val ORDER_REF: String="Order"
+    const val SHIPPING_ORDER_REF: String="ShippingOrder"
+    const val SHIPPER_REF: String="Shipper"
+    const val ORDER_REF: String="Order"
     var foodSelected: FoodModel?=null
     var categorySelected: CategoryModel?=null
 //    val CATEGORY_REF: String = "Category"
     const val CATEGORY_REF: String="Category"
-    val SERVER_REF = "Server"
+    const val SERVER_REF = "Server"
     var currentServerUser: ServerUserModel? = null
 
     const val NOTI_TITLE = "title"
     const val NOTI_CONTENT = "content"
 
-    val FULL_WIDTH_COLUMN: Int=1
-    val DEFAULT_COLUMN_COUNT: Int=0
+    const val FULL_WIDTH_COLUMN: Int=1
+    const val DEFAULT_COLUMN_COUNT: Int=0
 
-    val TOKEN_REF = "Tokens"
+    const val TOKEN_REF = "Tokens"
 
     fun getFileName(contentResolver: ContentResolver?, fileUri: Uri): Any {
         var result:String?=null
@@ -101,25 +100,25 @@ object Common {
     }
 
     fun getBearing(begin: LatLng, end: LatLng): Float {
-        val lat = Math.abs(begin.latitude - end.latitude)
-        val lng = Math.abs(begin.longitude - end.longitude)
+        val lat = abs(begin.latitude - end.latitude)
+        val lng = abs(begin.longitude - end.longitude)
         if (begin.latitude < end.latitude && begin.longitude < end.longitude) return Math.toDegrees(
-            Math.atan(lng / lat)
+            atan(lng / lat)
         )
             .toFloat() else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) return (90 - Math.toDegrees(
-            Math.atan(lng / lat)
+            atan(lng / lat)
         ) + 90).toFloat() else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) return (Math.toDegrees(
-            Math.atan(lng / lat)
+            atan(lng / lat)
         ) + 180).toFloat() else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) return (90 - Math.toDegrees(
-            Math.atan(lng / lat)
+            atan(lng / lat)
         ) + 270).toFloat()
         return (-1).toFloat()
     }
 
     fun decodePoly(encoded: String): List<LatLng> {
-        val poly:MutableList<LatLng> = ArrayList<LatLng>()
+        val poly:MutableList<LatLng> = ArrayList()
         var index = 0
-        var len = encoded.length
+        val len = encoded.length
         var lat = 0
         var lng = 0
         while (index < len)
@@ -156,12 +155,12 @@ object Common {
         val txtSpannable = SpannableString(name)
         val boldSpan = StyleSpan(Typeface.BOLD)
         txtSpannable.setSpan(boldSpan,0,name!!.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        txtSpannable.setSpan(ForegroundColorSpan(color),0,name!!.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        txtSpannable.setSpan(ForegroundColorSpan(color),0, name.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         builder.append(txtSpannable)
         txtUser!!.setText(builder,TextView.BufferType.SPANNABLE)
     }
 
-    fun convertStatusToString(orderStatus: Int): String? =
+    fun convertStatusToString(orderStatus: Int): String =
         when(orderStatus)
         {
             0 -> "Placed"
@@ -174,7 +173,7 @@ object Common {
     fun updateToken(context: Context, token: String, isServerToken:Boolean, isShipperToken:Boolean) {
         if (currentServerUser != null)
             FirebaseDatabase.getInstance()
-                .getReference(Common.TOKEN_REF)
+                .getReference(TOKEN_REF)
                 .child(currentServerUser!!.uid!!)
                 .setValue(TokenModel(currentServerUser!!.phone!!,token,isServerToken,isShipperToken))
                 .addOnFailureListener{ e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
@@ -184,12 +183,12 @@ object Common {
         var pendingIntent : PendingIntent?=null
         if (intent != null)
             pendingIntent = PendingIntent.getActivity(context,id,intent,PendingIntent.FLAG_UPDATE_CURRENT)
-        val NOTIFICATION_CHANNEL_ID = "com.example.eatitv2"
+        val channelId = "com.alfian.deliveryorderadmin"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID,
+            val notificationChannel = NotificationChannel(channelId,
                 "Eat It V2",NotificationManager.IMPORTANCE_DEFAULT)
 
             notificationChannel.description = "Eat It V2"
@@ -200,7 +199,7 @@ object Common {
 
             notificationManager.createNotificationChannel(notificationChannel)
         }
-        val builder = NotificationCompat.Builder(context,NOTIFICATION_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context,channelId)
 
         builder.setContentTitle(title!!).setContentText(content!!).setAutoCancel(true)
             .setSmallIcon(R.mipmap.ic_launcher_round)
@@ -237,14 +236,14 @@ object Common {
         +File.separator)
         if (!dir.exists())
             dir.mkdir()
-        return dir.path+File.separator;
+        return dir.path+File.separator
     }
 
     fun getBitmapFromUrl(
         context: Context,
         cartItem: CartItem,
         document: Document
-    ): io.reactivex.Observable<CartItem> {
+    ): Observable<CartItem> {
         return Observable.fromCallable{
             val bitmap = Glide.with(context)
                 .asBitmap()
@@ -264,7 +263,7 @@ object Common {
     }
 
     fun formatSizeJsonToString(foodSize: String): String? {
-        return if (foodSize.equals("Default")) foodSize else{
+        return if (foodSize == "Default") foodSize else{
             val gson = Gson()
             val sizeModel = gson.fromJson(foodSize,SizeModel::class.java)
             sizeModel.name
@@ -272,7 +271,7 @@ object Common {
     }
 
     fun formatAddonJsonToString(foodAddon: String): String? {
-        return if (foodAddon.equals("Default")) foodAddon else{
+        return if (foodAddon == "Default") foodAddon else{
             val stringBuilder = StringBuilder()
             val gson = Gson()
             val addonModels = gson.fromJson<List<AddonModel>>(foodAddon,object :

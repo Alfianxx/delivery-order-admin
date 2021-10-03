@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.kotlineatitv2server.callback.IOrderCallbackListener
 import com.example.kotlineatitv2server.common.Common
-import com.example.kotlineatitv2server.model.FoodModel
 import com.example.kotlineatitv2server.model.OrderModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -46,7 +45,7 @@ private val orderModelList = MutableLiveData<List<OrderModel>>()
                 {
                     val orderModel = itemSnapshot.getValue(OrderModel::class.java)
                     orderModel!!.key = itemSnapshot.key
-                    orderModel!!.orderNumber = itemSnapshot.key
+                    orderModel.orderNumber = itemSnapshot.key
                     tempList.add(orderModel)
                 }
                 orderCallbackListener.onOrderLoadSuccess(tempList)
@@ -55,7 +54,7 @@ private val orderModelList = MutableLiveData<List<OrderModel>>()
         })
     }
 
-    override fun onOrderLoadSuccess(orderModel: List<OrderModel>) {
+    override fun onOrderLoadSuccess(orderModel: List<OrderModel>) {     // Coba ganti mutableList
         if (orderModel.size >= 0)
         {
             //Sort Order

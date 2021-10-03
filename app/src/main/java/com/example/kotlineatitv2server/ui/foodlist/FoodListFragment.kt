@@ -21,7 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -49,15 +49,15 @@ class FoodListFragment : Fragment() {
     private val PICK_IMAGE_REQUEST: Int=1234
     private lateinit var foodListViewModel: FoodListViewModel
 
-    var recycler_food_list : RecyclerView?=null
-    var layoutAnimationController:LayoutAnimationController?=null
+    var recyclerFoodList : RecyclerView?=null
+    private var layoutAnimationController:LayoutAnimationController?=null
 
     var adapter : MyFoodListAdapter?=null
-    var foodModelList :List<FoodModel> = ArrayList<FoodModel>()
+    var foodModelList :List<FoodModel> = ArrayList()
 
 
     //Variable
-    private var img_food:ImageView?=null
+    private var imgFood:ImageView?=null
     private lateinit var storage:FirebaseStorage
     private lateinit var storageReference: StorageReference
     private lateinit var dialog:android.app.AlertDialog
@@ -105,15 +105,14 @@ class FoodListFragment : Fragment() {
         for (i in Common.categorySelected!!.foods!!.indices)
         {
             val foodModel = Common.categorySelected!!.foods!![i]
-            if (foodModel.name!!.toLowerCase().contains(s.toLowerCase()))
-            {
+            if (foodModel.name!!.toLowerCase(Locale.ROOT).contains(s.toLowerCase(Locale.ROOT))) {   // aslinya tanpa parameter locale
                 //Here we will save index of search result item
                 foodModel.positionInList = 1
                 resultFood.add(foodModel)
             }
         }
         //Update search result
-        foodListViewModel!!.getMutableFoodModelListData().value = resultFood
+        foodListViewModel.getMutableFoodModelListData().value = resultFood
     }
 
     override fun onCreateView(
@@ -122,15 +121,15 @@ class FoodListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         foodListViewModel =
-            ViewModelProviders.of(this).get(FoodListViewModel::class.java)
+            ViewModelProvider(this).get(FoodListViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_food_list,container,false)
         initViews(root)
         foodListViewModel.getMutableFoodModelListData().observe(viewLifecycleOwner, Observer {
             if(it!=null) {
                 foodModelList = it
                 adapter = MyFoodListAdapter(requireContext(), foodModelList)
-                recycler_food_list!!.adapter = adapter
-                recycler_food_list!!.layoutAnimation = layoutAnimationController
+                recyclerFoodList!!.adapter = adapter
+                recyclerFoodList!!.layoutAnimation = layoutAnimationController
             }
         })
         return root
@@ -138,15 +137,15 @@ class FoodListFragment : Fragment() {
 
     private fun initViews(root: View?){
 
-        setHasOptionsMenu(true); //Enable options menu on Fragment
+        setHasOptionsMenu(true) //Enable options menu on Fragment
 
         dialog = SpotsDialog.Builder().setContext(requireContext()).setCancelable(false).build()
         storage = FirebaseStorage.getInstance()
         storageReference = storage.reference
 
-        recycler_food_list = root!!.findViewById(R.id.recycler_food_list) as RecyclerView
-        recycler_food_list!!.setHasFixedSize(true)
-        recycler_food_list!!.layoutManager = LinearLayoutManager(context)
+        recyclerFoodList = root!!.findViewById(R.id.recycler_food_list) as RecyclerView
+        recyclerFoodList!!.setHasFixedSize(true)
+        recyclerFoodList!!.layoutManager = LinearLayoutManager(context)
 
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(context,R.anim.layout_item_from_left)
 
@@ -157,7 +156,7 @@ class FoodListFragment : Fragment() {
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
 
-        val swipe = object: MySwipeHelper(requireContext(),recycler_food_list!!,width/6)
+        val swipe = object: MySwipeHelper(requireContext(),recyclerFoodList!!,width/6)
         {
             override fun instantiateMyButton(
                 viewHolder: RecyclerView.ViewHolder,
@@ -175,15 +174,18 @@ class FoodListFragment : Fragment() {
                             val builder = AlertDialog.Builder(context!!)
                             builder.setTitle("Delete")
                                 .setMessage("Do you really want to delete food ?")
-                                .setNegativeButton("CANCEL",{dialogInterface, _ -> dialogInterface.dismiss() })
-                                .setPositiveButton("DELETE",{dialogInterface, i ->
+                                .setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+                                .setPositiveButton("DELETE") { _, _ ->
                                     val foodModel = adapter!!.getItemAtPosition(pos)
                                     if (foodModel.positionInList == -1)
                                         Common.categorySelected!!.foods!!.removeAt(pos)
                                     else
                                         Common.categorySelected!!.foods!!.removeAt(foodModel.positionInList)
-                                    updateFood(Common.categorySelected!!.foods,Common.ACTION.DELETE)
-                                })
+                                    updateFood(
+                                        Common.categorySelected!!.foods,
+                                        Common.ACTION.DELETE
+                                    )
+                                }
 
                             val deleteDialog = builder.create()
                             deleteDialog.show()
@@ -268,7 +270,7 @@ class FoodListFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_create)
-            showAddFoodDialog();
+            showAddFoodDialog()
         return super.onOptionsItemSelected(item)
     }
 
@@ -279,33 +281,33 @@ class FoodListFragment : Fragment() {
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_food,null)
 
-        val edt_food_name = itemView.findViewById<View>(R.id.edt_food_name) as EditText
-        val edt_food_price = itemView.findViewById<View>(R.id.edt_food_price) as EditText
-        val edt_food_description = itemView.findViewById<View>(R.id.edt_food_description) as EditText
-        img_food = itemView.findViewById<View>(R.id.img_food_image) as ImageView
+        val edtFoodName = itemView.findViewById<View>(R.id.edt_food_name) as EditText
+        val edtFoodPrice = itemView.findViewById<View>(R.id.edt_food_price) as EditText
+        val edtFoodDescription = itemView.findViewById<View>(R.id.edt_food_description) as EditText
+        imgFood = itemView.findViewById<View>(R.id.img_food_image) as ImageView
 
         //Set data
 
-        Glide.with(requireContext()).load(R.drawable.ic_baseline_image_grey_24).into(img_food!!)
+        Glide.with(requireContext()).load(R.drawable.ic_baseline_image_grey_24).into(imgFood!!)
 
         //Set Event
-        img_food!!.setOnClickListener {
+        imgFood!!.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST)
         }
 
-        builder.setNegativeButton("CANCEL",{dialogInterface, _ -> dialogInterface.dismiss() })
-        builder.setPositiveButton("CREATE"){dialogInterface, i ->
+        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("CREATE"){ dialogInterface, _ ->
 
             val updateFood = FoodModel()
-            updateFood.name = edt_food_name.text.toString()
-            updateFood.price = if(TextUtils.isEmpty(edt_food_price.text))
+            updateFood.name = edtFoodName.text.toString()
+            updateFood.price = if(TextUtils.isEmpty(edtFoodPrice.text))
                 0
             else
-                edt_food_price.text.toString().toLong()
-            updateFood.description = edt_food_description.text.toString()
+                edtFoodPrice.text.toString().toLong()
+            updateFood.description = edtFoodDescription.text.toString()
             //TODO : tambah id atau key
             val uid = UUID.randomUUID()
             updateFood.id = uid.toString()
@@ -327,7 +329,7 @@ class FoodListFragment : Fragment() {
                         val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
                         dialog.setMessage("Uploaded $progress")
                     }
-                    .addOnSuccessListener { taskSnapshot ->
+                    .addOnSuccessListener {
                         dialogInterface.dismiss()
                         imageFolder.downloadUrl.addOnSuccessListener{uri ->
                             dialog.dismiss()
@@ -358,35 +360,35 @@ class FoodListFragment : Fragment() {
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_food,null)
 
-        val edt_food_name = itemView.findViewById<View>(R.id.edt_food_name) as EditText
-        val edt_food_price = itemView.findViewById<View>(R.id.edt_food_price) as EditText
-        val edt_food_description = itemView.findViewById<View>(R.id.edt_food_description) as EditText
-        img_food = itemView.findViewById<View>(R.id.img_food_image) as ImageView
+        val edtFoodName = itemView.findViewById<View>(R.id.edt_food_name) as EditText
+        val edtFoodPrice = itemView.findViewById<View>(R.id.edt_food_price) as EditText
+        val edtFoodDescription = itemView.findViewById<View>(R.id.edt_food_description) as EditText
+        imgFood = itemView.findViewById<View>(R.id.img_food_image) as ImageView
 
         //Set data
-        edt_food_name.setText(StringBuilder("").append(foodModel.name))
-        edt_food_price.setText(StringBuilder("").append(foodModel.price))
-        edt_food_description.setText(StringBuilder("").append(foodModel.description))
-        Glide.with(requireContext()).load(foodModel.image).into(img_food!!)
+        edtFoodName.setText(StringBuilder("").append(foodModel.name))
+        edtFoodPrice.setText(StringBuilder("").append(foodModel.price))
+        edtFoodDescription.setText(StringBuilder("").append(foodModel.description))
+        Glide.with(requireContext()).load(foodModel.image).into(imgFood!!)
 
         //Set Event
-        img_food!!.setOnClickListener {
+        imgFood!!.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST)
         }
 
-        builder.setNegativeButton("CANCEL",{dialogInterface, _ -> dialogInterface.dismiss() })
-        builder.setPositiveButton("UPDATE"){dialogInterface, i ->
+        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("UPDATE"){ dialogInterface, _ ->
 
             val updateFood = foodModel
-            updateFood.name = edt_food_name.text.toString()
-            updateFood.price = if(TextUtils.isEmpty(edt_food_price.text))
+            updateFood.name = edtFoodName.text.toString()
+            updateFood.price = if(TextUtils.isEmpty(edtFoodPrice.text))
                 0
             else
-                edt_food_price.text.toString().toLong()
-            updateFood.description = edt_food_description.text.toString()
+                edtFoodPrice.text.toString().toLong()
+            updateFood.description = edtFoodDescription.text.toString()
 
             if (imageUri != null)
             {
@@ -404,7 +406,7 @@ class FoodListFragment : Fragment() {
                         val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
                         dialog.setMessage("Uploaded $progress")
                     }
-                    .addOnSuccessListener { taskSnapshot ->
+                    .addOnSuccessListener {
                         dialogInterface.dismiss()
                         imageFolder.downloadUrl.addOnSuccessListener{uri ->
                             dialog.dismiss()
@@ -433,7 +435,7 @@ class FoodListFragment : Fragment() {
             if (data != null && data.data != null)
             {
                 imageUri = data.data
-                img_food!!.setImageURI(imageUri)
+                imgFood!!.setImageURI(imageUri)
             }
         }
     }

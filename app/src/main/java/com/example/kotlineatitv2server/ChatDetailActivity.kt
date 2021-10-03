@@ -50,15 +50,15 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
     private var chatSender:String?=null
 
     var database: FirebaseDatabase?=null
-    var chatRef: DatabaseReference?=null
-    var offsetRef:DatabaseReference?=null
+    private var chatRef: DatabaseReference?=null
+    private var offsetRef:DatabaseReference?=null
     var listener: ILoadTimeFromFirebaseCallback?=null
 
     lateinit var adapter: FirebaseRecyclerAdapter<ChatMessageModel, RecyclerView.ViewHolder>
     lateinit var options: FirebaseRecyclerOptions<ChatMessageModel>
 
-    var fileUri: Uri?= null
-    var storageReference: StorageReference?=null
+    private var fileUri: Uri?= null
+    private var storageReference: StorageReference?=null
     var layoutManager: LinearLayoutManager?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,16 +71,16 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
 
     override fun onStart() {
         super.onStart()
-        if (adapter != null) adapter.startListening()
+        adapter.startListening()
     }
 
     override fun onResume() {
         super.onResume()
-        if (adapter != null) adapter.startListening()
+        adapter.startListening()
     }
 
     override fun onStop() {
-        if (adapter != null) adapter.stopListening()
+        adapter.stopListening()
         super.onStop()
     }
 
@@ -114,10 +114,9 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
             ) {
                 if (holder is ChatTextViewHolder)
                 {
-                    val chatTextViewHolder = holder
-                    chatTextViewHolder.txt_email!!.text = model.name
-                    chatTextViewHolder.txt_chat_message!!.text = model.content
-                    chatTextViewHolder.txt_time!!.text =
+                    holder.txtEmail!!.text = model.name
+                    holder.txtChatMessage!!.text = model.content
+                    holder.txtTime!!.text =
                         DateUtils.getRelativeTimeSpanString(model.timeStamp!!,
                             Calendar.getInstance().timeInMillis,0)
                             .toString()
@@ -125,15 +124,15 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
                 else
                 {
                     val chatPictureViewHolder = holder as ChatPictureViewHolder
-                    chatPictureViewHolder.txt_email!!.text = model.name
-                    chatPictureViewHolder.txt_chat_message!!.text = model.content
-                    chatPictureViewHolder.txt_time!!.text =
+                    chatPictureViewHolder.txtEmail!!.text = model.name
+                    chatPictureViewHolder.txtChatMessage!!.text = model.content
+                    chatPictureViewHolder.txtTime!!.text =
                         DateUtils.getRelativeTimeSpanString(model.timeStamp!!,
                             Calendar.getInstance().timeInMillis,0)
                             .toString()
                     Glide.with(this@ChatDetailActivity)
                         .load(model.pictureLink)
-                        .into(chatPictureViewHolder.img_preview!!)
+                        .into(chatPictureViewHolder.imgPreview!!)
 
                 }
             }
@@ -178,7 +177,7 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
         layoutManager = LinearLayoutManager(this)
         recycler_chat.layoutManager = layoutManager
 
-        toolbar.setTitle(chatSender)
+        toolbar.title = chatSender
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
@@ -227,11 +226,11 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
         {
             if (!mediaStorageDir.mkdir()) return null
         }
-        val time_stamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         return File(StringBuilder(mediaStorageDir.path)
             .append(File.separator)
             .append("IMG_")
-            .append(time_stamp)
+            .append(timeStamp)
             .append("_")
             .append(Random().nextInt()).toString())
     }
@@ -261,14 +260,14 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
         picture: Boolean,
         estimateTimeInMs: Long
     ) {
-        val update_data = HashMap<String,Any>()
-        update_data["lastUpdate"] = estimateTimeInMs
+        val updateData = HashMap<String,Any>()
+        updateData["lastUpdate"] = estimateTimeInMs
         if (picture)
-            update_data["lastMessage"] = "<Image>"
+            updateData["lastMessage"] = "<Image>"
         else
-            update_data["lastMessage"] = chatMessageModel.content!!
+            updateData["lastMessage"] = chatMessageModel.content!!
         chatRef!!.child(roomId!!)
-            .updateChildren(update_data)
+            .updateChildren(updateData)
             .addOnFailureListener { e-> Toast.makeText(this@ChatDetailActivity,e.message,Toast.LENGTH_SHORT).show() }
             .addOnCompleteListener { task2 ->
                 if (task2.isSuccessful)
@@ -285,14 +284,11 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
                             {
                                 edt_chat.setText("")
                                 edt_chat.requestFocus()
-                                if (adapter != null)
+                                adapter.notifyDataSetChanged()
+                                if (picture)
                                 {
-                                    adapter.notifyDataSetChanged()
-                                    if (picture)
-                                    {
-                                        fileUri = null
-                                        img_preview.visibility = View.GONE
-                                    }
+                                    fileUri = null
+                                    img_preview.visibility = View.GONE
                                 }
                             }
                         }
@@ -332,14 +328,11 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
                             {
                                 edt_chat.setText("")
                                 edt_chat.requestFocus()
-                                if (adapter != null)
+                                adapter.notifyDataSetChanged()
+                                if (picture)
                                 {
-                                    adapter.notifyDataSetChanged()
-                                    if (picture)
-                                    {
-                                        fileUri = null
-                                        img_preview.visibility = View.GONE
-                                    }
+                                    fileUri = null
+                                    img_preview.visibility = View.GONE
                                 }
                             }
                         }
@@ -348,43 +341,36 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
     }
 
     private fun uploadPicture(fileUri: Uri, chatMessageModel: ChatMessageModel,estimateTimeInMs:Long) {
-        if (fileUri != null)
-        {
-            val dialog = AlertDialog.Builder(this@ChatDetailActivity)
-                .setCancelable(false)
-                .setMessage("Please wait...")
-                .create()
-            dialog.show()
-            val fileName = Common.getFileName(contentResolver,fileUri!!)
-            val path = StringBuilder(Common.currentServerUser!!.restaurant!!)
-                .append("/")
-                .append(fileName)
-                .toString()
-            storageReference = FirebaseStorage.getInstance().getReference(path)
-            val uploadTask = storageReference!!.putFile(fileUri)
+        val dialog = AlertDialog.Builder(this@ChatDetailActivity)
+            .setCancelable(false)
+            .setMessage("Please wait...")
+            .create()
+        dialog.show()
+        val fileName = Common.getFileName(contentResolver, fileUri)
+        val path = StringBuilder(Common.currentServerUser!!.restaurant!!)
+            .append("/")
+            .append(fileName)
+            .toString()
+        storageReference = FirebaseStorage.getInstance().getReference(path)
+        val uploadTask = storageReference!!.putFile(fileUri)
 
-            uploadTask.continueWithTask { task1 ->
-                if (!task1.isSuccessful)
-                    Toast.makeText(this@ChatDetailActivity,"Failed to upload",Toast.LENGTH_SHORT).show()
-                storageReference!!.downloadUrl
-            }.addOnFailureListener { t ->
+        uploadTask.continueWithTask { task1 ->
+            if (!task1.isSuccessful)
+                Toast.makeText(this@ChatDetailActivity,"Failed to upload",Toast.LENGTH_SHORT).show()
+            storageReference!!.downloadUrl
+        }.addOnFailureListener { t ->
+            dialog.dismiss()
+            Toast.makeText(this@ChatDetailActivity,t.message,Toast.LENGTH_SHORT).show()
+        }.addOnCompleteListener { task2 ->
+            if (task2.isSuccessful)
+            {
+                val url = task2.result.toString()
                 dialog.dismiss()
-                Toast.makeText(this@ChatDetailActivity,t.message,Toast.LENGTH_SHORT).show()
-            }.addOnCompleteListener { task2 ->
-                if (task2.isSuccessful)
-                {
-                    val url = task2.result.toString()
-                    dialog.dismiss()
-                    chatMessageModel.isPicture = true
-                    chatMessageModel.pictureLink = url
+                chatMessageModel.isPicture = true
+                chatMessageModel.pictureLink = url
 
-                    submitChatToFirebase(chatMessageModel,chatMessageModel.isPicture,estimateTimeInMs)
-                }
+                submitChatToFirebase(chatMessageModel,chatMessageModel.isPicture,estimateTimeInMs)
             }
-        }
-        else
-        {
-            Toast.makeText(this@ChatDetailActivity,"Image is empty",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -422,8 +408,8 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
         {
             if (resultCode == Activity.RESULT_OK)
             {
-                var bitmap: Bitmap?
-                var ei: ExifInterface?
+                val bitmap: Bitmap?
+                val ei: ExifInterface?
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(contentResolver,fileUri)
                     ei = ExifInterface(contentResolver.openInputStream(fileUri!!)!!)
@@ -431,8 +417,7 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback{
                         ExifInterface.TAG_ORIENTATION,
                         ExifInterface.ORIENTATION_UNDEFINED
                     )
-                    var rotateBitmap:Bitmap
-                    rotateBitmap = when(orientation){
+                    val rotateBitmap:Bitmap = when(orientation){
                         ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(bitmap,90)!!
                         ExifInterface.ORIENTATION_ROTATE_180 -> rotateBitmap(bitmap,180)!!
                         ExifInterface.ORIENTATION_ROTATE_270 -> rotateBitmap(bitmap,270)!!

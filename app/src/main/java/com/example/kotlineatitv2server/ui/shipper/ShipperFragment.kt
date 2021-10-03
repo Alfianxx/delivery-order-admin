@@ -3,21 +3,20 @@ package com.example.kotlineatitv2server.ui.shipper
 import android.app.AlertDialog
 import android.app.SearchManager
 import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import android.view.animation.AnimationUtils
 import android.view.animation.LayoutAnimationController
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlineatitv2server.R
-import com.example.kotlineatitv2server.adapter.MyCategoriesAdapter
 import com.example.kotlineatitv2server.adapter.MyShipperAdapter
 import com.example.kotlineatitv2server.common.Common
 import com.example.kotlineatitv2server.model.ShipperModel
@@ -28,20 +27,19 @@ import dmax.dialog.SpotsDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class ShipperFragment : Fragment() {
 
     private lateinit var dialog: AlertDialog
     private lateinit var layoutAnimationController: LayoutAnimationController
     private var adapter: MyShipperAdapter?=null
-    private var recycler_shipper: RecyclerView?=null
+    private var recyclerShipper: RecyclerView?=null
 
-    internal var shipperModels:List<ShipperModel> = ArrayList<ShipperModel>()
-    internal var saveBeforeSearchList:List<ShipperModel> = ArrayList<ShipperModel>()
-
-    companion object {
-        fun newInstance() = ShipperFragment()
-    }
+    private var shipperModels:List<ShipperModel> = ArrayList()
+    private var saveBeforeSearchList:List<ShipperModel> = ArrayList()
 
     private lateinit var viewModel: ShipperViewModel
 
@@ -50,7 +48,7 @@ class ShipperFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val itemView = inflater.inflate(R.layout.fragment_shipper, container, false)
-        viewModel = ViewModelProviders.of(this).get(ShipperViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(ShipperViewModel::class.java)
         initViews(itemView)
 
         viewModel.getMessageError().observe(viewLifecycleOwner, Observer {
@@ -59,11 +57,11 @@ class ShipperFragment : Fragment() {
         viewModel.getShipperList().observe(viewLifecycleOwner, Observer {
             dialog.dismiss()
             shipperModels = it
-            if (saveBeforeSearchList.size == 0)
+            if (saveBeforeSearchList.isEmpty())
             saveBeforeSearchList = it
             adapter = MyShipperAdapter(requireContext(), shipperModels)
-            recycler_shipper!!.adapter =  adapter
-            recycler_shipper!!.layoutAnimation = layoutAnimationController
+            recyclerShipper!!.adapter =  adapter
+            recyclerShipper!!.layoutAnimation = layoutAnimationController
         })
         return itemView
     }
@@ -76,12 +74,12 @@ class ShipperFragment : Fragment() {
         dialog.show()
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_item_from_left)
 
-        recycler_shipper = root.findViewById(R.id.recycler_shipper) as RecyclerView
-        recycler_shipper!!.setHasFixedSize(true)
+        recyclerShipper = root.findViewById(R.id.recycler_shipper) as RecyclerView
+        recyclerShipper!!.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(context)
 
-        recycler_shipper!!.layoutManager = layoutManager
-        recycler_shipper!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
+        recyclerShipper!!.layoutManager = layoutManager
+        recyclerShipper!!.addItemDecoration(DividerItemDecoration(context,layoutManager.orientation))
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -127,13 +125,12 @@ class ShipperFragment : Fragment() {
         for (i in shipperModels.indices)
         {
             val shipperModel = shipperModels[i]
-            if (shipperModel.phone!!.toLowerCase().contains(s.toLowerCase()))
-            {
+            if (shipperModel.phone!!.toLowerCase(Locale.ROOT).contains(s.toLowerCase(Locale.ROOT))) {
                 resultShipper.add(shipperModel)
             }
         }
         //Update search result
-        viewModel!!.getShipperList().value = resultShipper
+        viewModel.getShipperList().value = resultShipper
     }
 
     override fun onStart() {
@@ -159,15 +156,15 @@ class ShipperFragment : Fragment() {
     fun onUpdateActiveEvent(updateActiveEvent: UpdateActiveEvent)
     {
         val updateData = HashMap<String,Any>()
-        updateData.put("active",updateActiveEvent.active)
+        updateData["active"] = updateActiveEvent.active
         FirebaseDatabase.getInstance()
             .getReference(Common.RESTAURANT_REF)
             .child(Common.currentServerUser!!.restaurant!!)
             .child(Common.SHIPPER_REF)
-            .child(updateActiveEvent.shipperModel!!.key!!)
+            .child(updateActiveEvent.shipperModel.key!!)
             .updateChildren(updateData)
             .addOnFailureListener{ e -> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show() }
-            .addOnSuccessListener { aVoid ->
+            .addOnSuccessListener {
                 Toast.makeText(context,"Update state to "+updateActiveEvent.active,Toast.LENGTH_SHORT).show()
             }
     }

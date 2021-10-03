@@ -9,12 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-
 import androidx.appcompat.app.AppCompatActivity
 import com.example.kotlineatitv2server.common.Common
 import com.example.kotlineatitv2server.model.ServerUserModel
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -33,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private var providers : List<AuthUI.IdpConfig>? = null
 
     companion object{
-        private val APP_REQUEST_CODE = 7171
+        private const val APP_REQUEST_CODE = 7171
     }
 
     override fun onStart() {
@@ -54,25 +52,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        providers = Arrays.asList<AuthUI.IdpConfig>(AuthUI.IdpConfig.PhoneBuilder().build(),
+        providers = listOf(AuthUI.IdpConfig.PhoneBuilder().build(),
         AuthUI.IdpConfig.EmailBuilder().build())
 
         serverRef = FirebaseDatabase.getInstance().getReference(Common.SERVER_REF)
         firebaseAuth = FirebaseAuth.getInstance()
         dialog = SpotsDialog.Builder().setContext(this).setCancelable(false).build()
-        listener = object:FirebaseAuth.AuthStateListener{
-            override fun onAuthStateChanged(firebaseAuth: FirebaseAuth) {
-                val user = firebaseAuth.currentUser
-                if (user != null)
-                {
-                    checkServerUserFromFirebase(user)
-                }
-                else
-                {
-                    phoneLogin()
-                }
+        listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user != null) {
+                checkServerUserFromFirebase(user)
+            } else {
+                phoneLogin()
             }
-
         }
     }
 
@@ -126,46 +118,50 @@ class MainActivity : AppCompatActivity() {
         builder.setMessage("Please fill information \n Admin will accept your account late")
 
         val itemView = LayoutInflater.from(this).inflate(R.layout.layout_register,null)
-        val phone_input_layout = itemView.findViewById<View>(R.id.phone_input_layout) as TextInputLayout
-        val edt_name = itemView.findViewById<View>(R.id.edt_name) as EditText
-        val edt_phone = itemView.findViewById<View>(R.id.edt_phone) as EditText
+        val phoneInputLayout = itemView.findViewById<View>(R.id.phone_input_layout) as TextInputLayout
+        val edtName = itemView.findViewById<View>(R.id.edt_name) as EditText
+        val edtPhone = itemView.findViewById<View>(R.id.edt_phone) as EditText
 
         //set data
         if (user.phoneNumber == null || TextUtils.isEmpty(user.phoneNumber))
         {
-            phone_input_layout.hint = "Email"
-            edt_phone.setText(user.email)
-            edt_name.setText(user.displayName)
+            phoneInputLayout.hint = "Email"
+            edtPhone.setText(user.email)
+            edtName.setText(user.displayName)
         }
         else
-            edt_phone.setText(user!!.phoneNumber)
+            edtPhone.setText(user.phoneNumber)
 
-        builder.setNegativeButton("CANCEL",{dialogInterface, _ -> dialogInterface.dismiss() })
-            .setPositiveButton("REGISTER", {_, _ ->
-                if (TextUtils.isEmpty(edt_name.text))
-                {
-                    Toast.makeText(this,"Please enter your name",Toast.LENGTH_SHORT).show()
+        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setPositiveButton("REGISTER") { _, _ ->
+                if (TextUtils.isEmpty(edtName.text)) {
+                    Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 val serverUserModel = ServerUserModel()
                 serverUserModel.uid = user.uid
-                serverUserModel.name = edt_name.text.toString()
-                serverUserModel.phone = edt_phone.text.toString()
-                serverUserModel.isActive = true //Default fail, we must active user by manual on Firebase   //TODO: Ganti false
+                serverUserModel.name = edtName.text.toString()
+                serverUserModel.phone = edtPhone.text.toString()
+                serverUserModel.isActive =
+                    true //Default fail, we must active user by manual on Firebase   //TODO: Ganti false
 
                 dialog!!.show()
                 serverRef!!.child(serverUserModel.uid!!)
                     .setValue(serverUserModel)
-                    .addOnFailureListener{ e ->
+                    .addOnFailureListener { e ->
                         dialog!!.dismiss()
-                        Toast.makeText(this,""+e.message,Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "" + e.message, Toast.LENGTH_SHORT).show()
                     }
-                    .addOnCompleteListener{_ ->
+                    .addOnCompleteListener {
                         dialog!!.dismiss()
-                        Toast.makeText(this,"Register success! Admin will check and active user soon",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Register success! Admin will check and active user soon",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-            })
+            }
 
         builder.setView(itemView)
 

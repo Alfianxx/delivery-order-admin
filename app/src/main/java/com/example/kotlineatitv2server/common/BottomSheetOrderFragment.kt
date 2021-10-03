@@ -12,17 +12,12 @@ import org.greenrobot.eventbus.EventBus
 
 class BottomSheetOrderFragment : BottomSheetDialogFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val itemView = inflater.inflate(R.layout.fragment_order_filter,container,false)
-        return itemView
+        return inflater.inflate(R.layout.fragment_order_filter, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -32,19 +27,19 @@ class BottomSheetOrderFragment : BottomSheetDialogFragment() {
 
     private fun initViews() {
         placed_filter.setOnClickListener {
-            EventBus.getDefault().postSticky(LoadOrderEvent(0));
+            EventBus.getDefault().postSticky(LoadOrderEvent(0))
             dismiss()
         }
         shipping_filter.setOnClickListener {
-            EventBus.getDefault().postSticky(LoadOrderEvent(1));
+            EventBus.getDefault().postSticky(LoadOrderEvent(1))
             dismiss()
         }
         shipped_filter.setOnClickListener {
-            EventBus.getDefault().postSticky(LoadOrderEvent(2));
+            EventBus.getDefault().postSticky(LoadOrderEvent(2))
             dismiss()
         }
         cancelled_filter.setOnClickListener {
-            EventBus.getDefault().postSticky(LoadOrderEvent(-1));
+            EventBus.getDefault().postSticky(LoadOrderEvent(-1))
             dismiss()
         }
     }

@@ -26,22 +26,18 @@ class MyOrderAdapter (internal var context: Context,
                       internal var orderList: MutableList<OrderModel>) :
     RecyclerView.Adapter<MyOrderAdapter.MyViewHolder>() {
 
-    lateinit var simpleDateFormat:SimpleDateFormat
-
-    init {
-        simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-    }
+    private var simpleDateFormat:SimpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
 
     class MyViewHolder (itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-        var txt_time: TextView?=null
-        var txt_order_number: TextView?=null
-        var txt_order_status: TextView?=null
-        var txt_num_item: TextView?=null
-        var txt_name: TextView?=null
+        var txtTime: TextView?=null
+        var txtOrderNumber: TextView?=null
+        var txtOrderStatus: TextView?=null
+        var txtNumItem: TextView?=null
+        var txtName: TextView?=null
 
-        var img_food_image: ImageView?=null
+        var imgFoodImage: ImageView?=null
 
-        internal var iRecyclerItemClickListener: IRecyclerItemClickListener?=null
+        private var iRecyclerItemClickListener: IRecyclerItemClickListener?=null
 
         fun setListener(iRecyclerItemClickListener: IRecyclerItemClickListener)
         {
@@ -49,13 +45,13 @@ class MyOrderAdapter (internal var context: Context,
         }
 
         init {
-            img_food_image = itemView.findViewById(R.id.img_food_image) as ImageView
+            imgFoodImage = itemView.findViewById(R.id.img_food_image) as ImageView
 
-            txt_time = itemView.findViewById(R.id.txt_time) as TextView
-            txt_order_number = itemView.findViewById(R.id.txt_order_number) as TextView
-            txt_order_status = itemView.findViewById(R.id.txt_order_status) as TextView
-            txt_num_item = itemView.findViewById(R.id.txt_num_item) as TextView
-            txt_name = itemView.findViewById(R.id.txt_name) as TextView
+            txtTime = itemView.findViewById(R.id.txt_time) as TextView
+            txtOrderNumber = itemView.findViewById(R.id.txt_order_number) as TextView
+            txtOrderStatus = itemView.findViewById(R.id.txt_order_status) as TextView
+            txtNumItem = itemView.findViewById(R.id.txt_num_item) as TextView
+            txtName = itemView.findViewById(R.id.txt_name) as TextView
 
             itemView.setOnClickListener(this)
         }
@@ -75,20 +71,20 @@ class MyOrderAdapter (internal var context: Context,
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         Glide.with(context).load(orderList[position].cartItemList!![0].foodImage)
-            .into(holder.img_food_image!!)
-        holder.txt_order_number!!.setText(orderList[position].key)
+            .into(holder.imgFoodImage!!)
+        holder.txtOrderNumber!!.text = orderList[position].key
         Common.setSpanStringColor("Order date ",simpleDateFormat.format(orderList[position].createDate),
-        holder.txt_time,Color.parseColor("#333639"))
+        holder.txtTime,Color.parseColor("#333639"))
 
         Common.setSpanStringColor("Order status ",Common.convertStatusToString(orderList[position].orderStatus),
-            holder.txt_order_status,Color.parseColor("#005758"))
+            holder.txtOrderStatus,Color.parseColor("#005758"))
 
         Common.setSpanStringColor("Num of items ",if (orderList[position].cartItemList == null) "0"
             else orderList[position].cartItemList!!.size.toString(),
-            holder.txt_num_item,Color.parseColor("#00574B"))
+            holder.txtNumItem,Color.parseColor("#00574B"))
 
         Common.setSpanStringColor("Name ",orderList[position].userName,
-            holder.txt_name,Color.parseColor("#006061"))
+            holder.txtName,Color.parseColor("#006061"))
 
         holder.setListener(object:IRecyclerItemClickListener{
             override fun onItemClick(view: View, pos: Int) {
@@ -98,18 +94,18 @@ class MyOrderAdapter (internal var context: Context,
     }
 
     private fun showDialog(cartItemList: List<CartItem>?) {
-        val layout_dialog = LayoutInflater.from(context).inflate(R.layout.layout_dialog_order_detail,null)
+        val layoutDialog = LayoutInflater.from(context).inflate(R.layout.layout_dialog_order_detail,null)
         val builder = AlertDialog.Builder(context)
-        builder.setView(layout_dialog)
+        builder.setView(layoutDialog)
         
-        val btn_ok = layout_dialog.findViewById<View>(R.id.btn_ok) as Button
-        val recycler_order_detail = layout_dialog.findViewById<View>(R.id.recycler_order_detail) as RecyclerView
-        recycler_order_detail.setHasFixedSize(true)
+        val btnOk = layoutDialog.findViewById<View>(R.id.btn_ok) as Button
+        val recyclerOrderDetail = layoutDialog.findViewById<View>(R.id.recycler_order_detail) as RecyclerView
+        recyclerOrderDetail.setHasFixedSize(true)
         val layoutManger = LinearLayoutManager(context)
-        recycler_order_detail.layoutManager = layoutManger
-        recycler_order_detail.addItemDecoration(DividerItemDecoration(context,layoutManger.orientation))
+        recyclerOrderDetail.layoutManager = layoutManger
+        recyclerOrderDetail.addItemDecoration(DividerItemDecoration(context,layoutManger.orientation))
         val adapter = MyOrderDetailAdapter(context,cartItemList!!.toMutableList())
-        recycler_order_detail.adapter = adapter
+        recyclerOrderDetail.adapter = adapter
 
         //Show dialog
         val dialog = builder.create()
@@ -118,7 +114,7 @@ class MyOrderAdapter (internal var context: Context,
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window!!.setGravity(Gravity.CENTER)
 
-        btn_ok.setOnClickListener { dialog.dismiss() }
+        btnOk.setOnClickListener { dialog.dismiss() }
     }
 
     fun getItemAtPosition(pos: Int): OrderModel {

@@ -4,31 +4,21 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kotlineatitv2server.R
-import com.example.kotlineatitv2server.callback.IRecyclerItemClickListener
-import com.example.kotlineatitv2server.model.CategoryModel
 import com.example.kotlineatitv2server.model.ShipperModel
 import com.example.kotlineatitv2server.model.eventbus.UpdateActiveEvent
 import org.greenrobot.eventbus.EventBus
 
 class MyShipperAdapter (internal var context: Context,
-                        internal var shipperList: List<ShipperModel>): RecyclerView.Adapter<MyShipperAdapter.MyViewHolder>() {
+                        private var shipperList: List<ShipperModel>): RecyclerView.Adapter<MyShipperAdapter.MyViewHolder>() {
     inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        var txt_name: TextView?=null
-        var txt_phone: TextView?=null
-
-        var btn_enable: SwitchCompat?=null
-
-        init{
-            txt_name = itemView.findViewById(R.id.txt_name) as TextView
-            txt_phone = itemView.findViewById(R.id.txt_phone) as TextView
-            btn_enable = itemView.findViewById(R.id.btn_enable) as SwitchCompat
-        }
+        var txtName: TextView = itemView.findViewById(R.id.txt_name)
+        var txtPhone: TextView = itemView.findViewById(R.id.txt_phone)
+        var btnEnable: SwitchCompat = itemView.findViewById(R.id.btn_enable)
 
     }
 
@@ -42,12 +32,12 @@ class MyShipperAdapter (internal var context: Context,
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.txt_name!!.setText(shipperList[position].name)
-        holder.txt_phone!!.setText(shipperList[position].phone)
-        holder.btn_enable!!.isChecked = shipperList[position].isActive
+        holder.txtName.text = shipperList[position].name
+        holder.txtPhone.text = shipperList[position].phone
+        holder.btnEnable.isChecked = shipperList[position].isActive
 
         //Event
-        holder.btn_enable!!.setOnCheckedChangeListener{ compoundButton, b ->
+        holder.btnEnable.setOnCheckedChangeListener{ _, b ->
             EventBus.getDefault().postSticky(UpdateActiveEvent(shipperList[position],b))
         }
     }

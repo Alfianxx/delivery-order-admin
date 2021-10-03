@@ -5,20 +5,19 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.kotlineatitv2server.callback.IShipperLoadCallbackListener
 import com.example.kotlineatitv2server.callback.ISingleShippingOrderCallbackListener
 import com.example.kotlineatitv2server.common.Common
 import com.example.kotlineatitv2server.model.ShippingOrderModel
 import com.example.kotlineatitv2server.remote.IGoogleAPI
 import com.example.kotlineatitv2server.remote.RetrofitGoogleAPIClient
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -80,14 +79,14 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        mMap!!.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isZoomControlsEnabled = true
         try {
             val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.uber_light_with_label))
             if (!success)
-                Log.d("Darwis","Failed to load map style")
+                Log.d("aan","Failed to load map style")
         }catch (ex: Resources.NotFoundException)
         {
-            Log.d("Darwis","Not found json string for map style")
+            Log.d("aan","Not found json string for map style")
         }
 
         checkOrderFromFirebase()
@@ -132,11 +131,11 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
             shippingOrderModel.currentLat,
             shippingOrderModel.currentLng)
 
-        //Addbox
+        //Add box
         mMap.addMarker(MarkerOptions()
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.box))
-            .title(shippingOrderModel!!.orderModel!!.userName)
-            .snippet(shippingOrderModel!!.orderModel!!.shippingAddress)
+            .title(shippingOrderModel.orderModel!!.userName)
+            .snippet(shippingOrderModel.orderModel!!.shippingAddress)
             .position(locationOrder))
 
         //add shipper
@@ -150,8 +149,8 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
 
             shipperMarker =  mMap.addMarker(MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(resized))
-                .title(shippingOrderModel!!.shipperName)
-                .snippet(shippingOrderModel!!.shipperPhone)
+                .title(shippingOrderModel.shipperName)
+                .snippet(shippingOrderModel.shipperPhone)
                 .position(locationShipper))
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationShipper,18.0f))
@@ -163,17 +162,17 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         //Draw route
-        val to = StringBuilder().append(shippingOrderModel!!.orderModel!!.lat)
+        val to = StringBuilder().append(shippingOrderModel.orderModel!!.lat)
             .append(",")
-            .append(shippingOrderModel!!.orderModel!!.lng)
+            .append(shippingOrderModel.orderModel!!.lng)
             .toString()
 
-        val from = StringBuilder().append(shippingOrderModel!!.currentLat)
+        val from = StringBuilder().append(shippingOrderModel.currentLat)
             .append(",")
-            .append(shippingOrderModel!!.currentLng)
+            .append(shippingOrderModel.currentLng)
             .toString()
 
-        compositeDisposable.add(iGoogleAPI!!.getDirections("driving","less_driving",
+        compositeDisposable.add(iGoogleAPI.getDirections("driving","less_driving",
             from,to,
             getString(R.string.google_maps_key))!!
             .subscribeOn(Schedulers.io())
@@ -216,7 +215,7 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
             .getReference(Common.RESTAURANT_REF)
             .child(Common.currentServerUser!!.restaurant!!)
             .child(Common.SHIPPING_ORDER_REF)
-            .child(currentShippingOrder!!.key!!)
+            .child(currentShippingOrder.key!!)
         shippingRef.addValueEventListener(this)
 
     }
@@ -248,7 +247,7 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun moveMakerAnimation(shipperMarker: Marker?, from: String, to: String) {
-        compositeDisposable.add(iGoogleAPI!!.getDirections("driving",
+        compositeDisposable.add(iGoogleAPI.getDirections("driving",
             "less_driving",
             from,
             to,
@@ -288,8 +287,8 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
 
                     //Animator
                     val polylineAnimator = ValueAnimator.ofInt(0,100)
-                    polylineAnimator.setDuration(2000)
-                    polylineAnimator.setInterpolator(LinearInterpolator())
+                    polylineAnimator.duration = 2000
+                    polylineAnimator.interpolator = LinearInterpolator()
                     polylineAnimator.addUpdateListener { valueAnimator ->
                         val points = grayPolyline!!.points
                         val percentValue = Integer.parseInt(valueAnimator.animatedValue.toString())
@@ -315,17 +314,17 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
                             }
 
                             val valueAnimator = ValueAnimator.ofInt(0,1)
-                            valueAnimator.setDuration(1500)
-                            valueAnimator.setInterpolator(LinearInterpolator())
-                            valueAnimator.addUpdateListener { valueAnimator ->
-                                v = valueAnimator.animatedFraction
-                                lat = v * endPosition!!.latitude + (1-v) * startPosition!!.latitude
-                                lng = v * endPosition!!.longitude + (1-v) * startPosition!!.longitude
+                            valueAnimator.duration = 1500
+                            valueAnimator.interpolator = LinearInterpolator()
+                            valueAnimator.addUpdateListener { valueAnim ->
+                                v = valueAnim.animatedFraction
+                                lat = v * endPosition.latitude + (1-v) * startPosition.latitude
+                                lng = v * endPosition.longitude + (1-v) * startPosition.longitude
 
                                 val newPos = LatLng(lat,lng)
                                 shipperMarker!!.position = newPos
-                                shipperMarker!!.setAnchor(0.5f,0.5f)
-                                shipperMarker!!.rotation = Common.getBearing(startPosition!!,newPos)
+                                shipperMarker.setAnchor(0.5f,0.5f)
+                                shipperMarker.rotation = Common.getBearing(startPosition,newPos)
 
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(shipperMarker.position)) //Fixed
 
@@ -338,7 +337,7 @@ class TrackingOrderActivity : AppCompatActivity(), OnMapReadyCallback,
 
                     }
 
-                    handler = Handler()
+                    handler = Handler(Looper.getMainLooper())
                     handler!!.postDelayed(r,1500)
 
 

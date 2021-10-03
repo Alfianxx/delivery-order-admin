@@ -1,7 +1,6 @@
 package com.example.kotlineatitv2server.common
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -20,7 +19,7 @@ import kotlin.collections.HashMap
 
 abstract class MySwipeHelper(context: Context,
                              private val recyclerView: RecyclerView,
-                             internal var buttonWidth:Int):ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT){
+                             private var buttonWidth:Int):ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT){
 
     abstract fun instantiateMyButton(viewHolder: RecyclerView.ViewHolder,buffer:MutableList<MyButton>)
 
@@ -113,11 +112,6 @@ abstract class MySwipeHelper(context: Context,
     {
         private var pos:Int=0
         private var clickRegion:RectF? = null
-        private val resources:Resources
-
-        init {
-            resources = context.resources
-        }
 
         fun onClick(x:Float,y:Float):Boolean{
             if (clickRegion != null && clickRegion!!.contains(x,y))
@@ -142,8 +136,8 @@ abstract class MySwipeHelper(context: Context,
             val cWidth = rectf.width()
             p.textAlign = Paint.Align.LEFT
             p.getTextBounds(text,0,text.length,r)
-            var x=0f
-            var y=0f
+            val x: Float
+            val y: Float
             if (imageResId == 0) //Just text
             {
                 x = cWidth/2f - r.width()/2f - r.left.toFloat()
@@ -166,7 +160,7 @@ abstract class MySwipeHelper(context: Context,
     private fun drawableToBitMap(d: Drawable?): Bitmap {
         if (d!! is BitmapDrawable)
             return d.toBitmap()
-        val bitmap = Bitmap.createBitmap(d!!.intrinsicWidth,d.intrinsicHeight,Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(d.intrinsicWidth,d.intrinsicHeight,Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         d.setBounds(0,0,canvas.width,canvas.height)
         d.draw(canvas)
@@ -220,7 +214,7 @@ abstract class MySwipeHelper(context: Context,
     ) {
         val pos = viewHolder.adapterPosition
         var translationX = dX
-        var itemView= viewHolder.itemView
+        val itemView= viewHolder.itemView
         if (pos < 0)
         {
             swipePosition = pos
