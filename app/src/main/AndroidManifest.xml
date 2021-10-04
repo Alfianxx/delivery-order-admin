@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.kotlineatitv2server">
+    package="com.alfian.deliveryorderadmin">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -37,7 +37,7 @@
         <activity
             android:name=".TrackingOrderActivity"
             android:label="@string/title_activity_tracking_order" />
-        <activity android:name=".SizeAddonEditActivity" />
+
         <activity
             android:name=".HomeActivity"
             android:label="@string/title_activity_home"

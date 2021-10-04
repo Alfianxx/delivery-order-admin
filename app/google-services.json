@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:322096062501:android:7fb492f310a7ef4d881fcc",
         "android_client_info": {
-          "package_name": "com.example.kotlineatitv2client"
+          "package_name": "com.alfian.deliveryorderadmin"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "322096062501-v3og0i4ve09poafasbi0hmmkjlj9asbl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.kotlineatitv2client",
+            "package_name": "com.alfian.deliveryorderadmin",
             "certificate_hash": "53b830eacd01b3caa1c7af3d18647cd81c4ea3ce"
           }
         },
@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:322096062501:android:edaf01f4ac955260881fcc",
         "android_client_info": {
-          "package_name": "com.example.kotlineatitv2server"
+          "package_name": "com.alfian.deliveryorderadmin"
         }
       },
       "oauth_client": [
