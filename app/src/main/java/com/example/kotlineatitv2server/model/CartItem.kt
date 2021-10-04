@@ -11,10 +11,6 @@ class CartItem {
 
     var foodQuantity:Int=0
 
-    var foodAddon:String?=""
-
-    var foodSize:String?=""
-
     var userPhone:String?=""
 
     var foodExtraPrice:Double=0.0

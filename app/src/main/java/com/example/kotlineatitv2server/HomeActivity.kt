@@ -550,7 +550,7 @@ class HomeActivity : AppCompatActivity() {
             //Setting
             document.pageSize = (PageSize.A4)
             document.addCreationDate()
-            document.addAuthor("Eat It V2")
+            document.addAuthor("Alfian")
             document.addCreator(Common.currentServerUser!!.name)
 
             //font setting
@@ -622,30 +622,32 @@ class HomeActivity : AppCompatActivity() {
                         orderNumberValueFont
                     )
                     //Food size and addon
-                    PDFUtils.addNewItemWithLeftAndRight(
-                        document,
-                        "Size",
-                        Common.formatSizeJsonToString(cartItem.foodSize!!)!!,
-                        titleFont,
-                        orderNumberValueFont
-                    )
-                    PDFUtils.addNewItemWithLeftAndRight(
-                        document,
-                        "Addon",
-                        Common.formatAddonJsonToString(cartItem.foodAddon!!)!!,
-                        titleFont,
-                        orderNumberValueFont
-                    )
+                    // TODO : Hapus nanti : size
+//                    PDFUtils.addNewItemWithLeftAndRight(
+//                        document,
+//                        "Size",
+//                        Common.formatSizeJsonToString(cartItem.foodSize!!)!!,
+//                        titleFont,
+//                        orderNumberValueFont
+//                    )
+                    // TODO : Hapus nanti : addon
+//                    PDFUtils.addNewItemWithLeftAndRight(
+//                        document,
+//                        "Addon",
+//                        Common.formatAddonJsonToString(cartItem.foodAddon!!)!!,
+//                        titleFont,
+//                        orderNumberValueFont
+//                    )
 
                     //Food price
                     //format : 1*30 = 30
                     PDFUtils.addNewItemWithLeftAndRight(
                         document,
-                        StringBuilder().append(cartItem.foodQuantity)
-                            .append("*")
-                            .append(cartItem.foodExtraPrice + cartItem.foodPrice)
+                        StringBuilder("Harga: ").append(cartItem.foodQuantity)
+                            .append(" x ")
+                            .append(cartItem.foodExtraPrice.toInt() + cartItem.foodPrice.toInt())
                             .toString(),
-                        StringBuilder().append(cartItem.foodQuantity * (cartItem.foodExtraPrice + cartItem.foodPrice))
+                        StringBuilder().append(cartItem.foodQuantity * (cartItem.foodExtraPrice + cartItem.foodPrice).toInt())
                             .toString(),
                         titleFont,
                         orderNumberValueFont
@@ -667,7 +669,7 @@ class HomeActivity : AppCompatActivity() {
                         PDFUtils.addNewItemWithLeftAndRight(
                             document,
                             "Total",
-                            StringBuilder().append(orderModel.totalPayment).toString(),
+                            StringBuilder().append(orderModel.totalPayment.toInt()).toString(),
                             titleFont,
                             titleFont
                         )

@@ -49,20 +49,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_food_add_on"
-            android:text="Addon: Default"
+            android:id="@+id/txt_food_price_detail"
+            android:text="Alamat: jalan pettarani"
             android:fontFamily="@font/brandon_medium"
             android:textStyle="italic"
             android:textSize="16sp"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/txt_size"
-            android:text="Size: Medium"
-            android:fontFamily="@font/brandon_medium"
-            android:textStyle="italic"
-            android:textSize="16sp"/>
 
     </LinearLayout>
 

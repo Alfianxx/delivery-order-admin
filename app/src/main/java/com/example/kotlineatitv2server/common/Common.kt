@@ -262,25 +262,27 @@ object Common {
         return stream.toByteArray()
     }
 
-    fun formatSizeJsonToString(foodSize: String): String? {
-        return if (foodSize == "Default") foodSize else{
-            val gson = Gson()
-            val sizeModel = gson.fromJson(foodSize,SizeModel::class.java)
-            sizeModel.name
-        }
-    }
+    // TODO : Hapus nanti : size
+//    fun formatSizeJsonToString(foodSize: String): String? {
+//        return if (foodSize == "Default") foodSize else{
+//            val gson = Gson()
+//            val sizeModel = gson.fromJson(foodSize,SizeModel::class.java)
+//            sizeModel.name
+//        }
+//    }
 
-    fun formatAddonJsonToString(foodAddon: String): String? {
-        return if (foodAddon == "Default") foodAddon else{
-            val stringBuilder = StringBuilder()
-            val gson = Gson()
-            val addonModels = gson.fromJson<List<AddonModel>>(foodAddon,object :
-            TypeToken<List<AddonModel>>(){}.type)
-            for (addon in addonModels)
-                stringBuilder.append(addon.name).append(",")
-            stringBuilder.substring(0,stringBuilder.length-1) //Remove last ","
-        }
-    }
+    // TODO : Hapus nanti : addon
+//    fun formatAddonJsonToString(foodAddon: String): String? {
+//        return if (foodAddon == "Default") foodAddon else{
+//            val stringBuilder = StringBuilder()
+//            val gson = Gson()
+//            val addonModels = gson.fromJson<List<AddonModel>>(foodAddon,object :
+//            TypeToken<List<AddonModel>>(){}.type)
+//            for (addon in addonModels)
+//                stringBuilder.append(addon.name).append(",")
+//            stringBuilder.substring(0,stringBuilder.length-1) //Remove last ","
+//        }
+//    }
 
     enum class ACTION{
         CREATE,

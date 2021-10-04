@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
             .createSignInIntentBuilder()
             .setAvailableProviders(providers!!)
             .setTheme(R.style.LoginTheme)
-            .setLogo(R.drawable.logo)
+            .setLogo(R.drawable.delivery_logo)
             .setIsSmartLockEnabled(false)   // beda
             .build(),APP_REQUEST_CODE)
     }

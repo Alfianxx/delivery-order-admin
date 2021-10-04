@@ -8,6 +8,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/drawable/ic_speaker_notes_black_24dp.xml" value="0.20260416666666667" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/activity_home.xml" value="0.18645833333333334" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/activity_size_addon_edit.xml" value="0.18645833333333334" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/activity_tracking_order.xml" value="0.18645833333333334" />
@@ -16,6 +17,7 @@
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/fragment_best_deals.xml" value="0.18645833333333334" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/fragment_food_list.xml" value="0.18645833333333334" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/layout_food_item.xml" value="0.25" />
+        <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/layout_order_detail_item.xml" value="0.33" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/layout/most_popular_fragment.xml" value="0.18645833333333334" />
         <entry key="..\:/Coding/AndroidStudio/Skripsi/KotlinEatItV2Server/app/src/main/res/menu/activity_home_drawer.xml" value="0.5" />
       </map>
