@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/img_food_image"
+            android:id="@+id/img_item_image"
             android:layout_width="0dp"
             android:layout_weight="3"
             android:scaleType="fitXY"
@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_food_name"
+            android:id="@+id/txt_item_name"
             android:text="THAI SALAD STYLE"
             android:textColor="@android:color/holo_blue_light"
             android:fontFamily="@font/brandon_medium"
@@ -40,7 +40,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_food_quantity"
+            android:id="@+id/txt_item_quantity"
             android:text="Quantity: 1"
             android:fontFamily="@font/brandon_medium"
             android:textStyle="italic"
@@ -49,7 +49,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_food_price_detail"
+            android:id="@+id/txt_item_price_detail"
             android:text="Alamat: jalan pettarani"
             android:fontFamily="@font/brandon_medium"
             android:textStyle="italic"

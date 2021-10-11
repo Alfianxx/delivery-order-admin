@@ -18,11 +18,11 @@ class MyOrderDetailAdapter(internal var context: Context, private var cartItemLi
 
     class MyViewHolder(itemView: View):RecyclerView.ViewHolder(itemView)
     {
-        var txtFoodName:TextView = itemView.findViewById(R.id.txt_food_name)
+        var txtItemName:TextView = itemView.findViewById(R.id.txt_item_name)
 
-        var txtFoodQuantity:TextView = itemView.findViewById(R.id.txt_food_quantity)
-        var imgFoodImage:ImageView = itemView.findViewById(R.id.img_food_image)
-        var txtFoodPrice:TextView = itemView.findViewById(R.id.txt_food_price_detail)
+        var txtItemQuantity:TextView = itemView.findViewById(R.id.txt_item_quantity)
+        var imgItem:ImageView = itemView.findViewById(R.id.img_item_image)
+        var txtItemPrice:TextView = itemView.findViewById(R.id.txt_item_price_detail)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -35,12 +35,12 @@ class MyOrderDetailAdapter(internal var context: Context, private var cartItemLi
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Glide.with(context).load(cartItemList[position].foodImage)
-            .into(holder.imgFoodImage)
-        holder.txtFoodName.text = StringBuilder().append(cartItemList[position].foodName)
-        holder.txtFoodQuantity.text = StringBuilder("Jumlah:  ").append(cartItemList[position].foodQuantity)
+        Glide.with(context).load(cartItemList[position].itemImage)
+            .into(holder.imgItem)
+        holder.txtItemName.text = StringBuilder().append(cartItemList[position].itemName)
+        holder.txtItemQuantity.text = StringBuilder("Jumlah:  ").append(cartItemList[position].itemQuantity)
 
-        holder.txtFoodPrice.text = StringBuilder("Harga:  ").append(cartItemList[position].foodPrice)
+        holder.txtItemPrice.text = StringBuilder("Harga:  ").append(cartItemList[position].itemPrice)
 
     }
 

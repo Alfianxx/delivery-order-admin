@@ -8,14 +8,14 @@
     <fragment
         android:id="@+id/nav_category"
         android:name="com.alfian.deliveryorderadmin.ui.category.CategoryFragment"
-        android:label="@string/menu_category"
+        android:label="@string/menu_product"
         tools:layout="@layout/fragment_category"/>
 
     <fragment
-        android:id="@+id/nav_food_list"
-        android:name="com.alfian.deliveryorderadmin.ui.foodlist.FoodListFragment"
-        android:label="@string/menu_food_list"
-        tools:layout="@layout/fragment_food_list">
+        android:id="@+id/nav_item_list"
+        android:name="com.alfian.deliveryorderadmin.ui.itemlist.ItemListFragment"
+        android:label="@string/menu_item_list"
+        tools:layout="@layout/fragment_item_list">
 
         <action android:id="@+id/clearBackStack"
             app:launchSingleTop="true"

@@ -165,10 +165,10 @@ class CategoryFragment : Fragment() {
 
     private fun deleteCategory() {
         FirebaseDatabase.getInstance()
-            .getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+            .getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.CATEGORY_REF)
-            .child(Common.categorySelected!!.menu_id!!)
+            .child(Common.categorySelected!!.menuId!!)
             .removeValue()
             .addOnFailureListener{e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
             .addOnCompleteListener{
@@ -239,10 +239,10 @@ class CategoryFragment : Fragment() {
 
     private fun updateCategory(updateData: java.util.HashMap<String, Any>) {
         FirebaseDatabase.getInstance()
-            .getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+            .getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.CATEGORY_REF)
-            .child(Common.categorySelected!!.menu_id!!)
+            .child(Common.categorySelected!!.menuId!!)
             .updateChildren(updateData)
             .addOnFailureListener{e-> Toast.makeText(context,""+e.message,Toast.LENGTH_SHORT).show()}
             .addOnCompleteListener{
@@ -277,7 +277,7 @@ class CategoryFragment : Fragment() {
 
             val categoryModel = CategoryModel()
             categoryModel.name = edtCategoryName.text.toString()
-            categoryModel.foods = ArrayList()
+            categoryModel.items = ArrayList()
 
 
             if (imageUri != null)
@@ -317,8 +317,8 @@ class CategoryFragment : Fragment() {
 
     private fun addCategory(categoryModel: CategoryModel) {
         FirebaseDatabase.getInstance()
-            .getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+            .getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.CATEGORY_REF)
             .push()
             .setValue(categoryModel)

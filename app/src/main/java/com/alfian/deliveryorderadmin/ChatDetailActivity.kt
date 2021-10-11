@@ -163,8 +163,8 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback {
 
         listener = this
         database = FirebaseDatabase.getInstance()
-        chatRef = database!!.getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+        chatRef = database!!.getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.CHAT_REF)
         offsetRef = database!!.getReference(".info/serverTimeOffset")
 
@@ -221,7 +221,7 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback {
     private fun getOutputMediaFile(): File? {
         val mediaStorageDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-            "EatItV2")
+            "EatItV2")  //todo : ganti nama
         if (!mediaStorageDir.exists())
         {
             if (!mediaStorageDir.mkdir()) return null
@@ -347,7 +347,7 @@ class ChatDetailActivity : AppCompatActivity(), ILoadTimeFromFirebaseCallback {
             .create()
         dialog.show()
         val fileName = Common.getFileName(contentResolver, fileUri)
-        val path = StringBuilder(Common.currentServerUser!!.restaurant!!)
+        val path = StringBuilder(Common.currentServerUser!!.shop!!)
             .append("/")
             .append(fileName)
             .toString()

@@ -1,6 +1,6 @@
 package com.alfian.deliveryorderadmin.model
 
-class FoodModel {
+class ItemModel {
     var key:String?=null
     var name:String?=null
     var image:String?=null

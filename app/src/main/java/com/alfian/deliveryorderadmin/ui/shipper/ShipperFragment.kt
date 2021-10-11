@@ -83,7 +83,7 @@ class ShipperFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.food_list_menu,menu)
+        inflater.inflate(R.menu.item_list_menu,menu)
 
         //Create search view
         val menuItem = menu.findItem(R.id.action_search)
@@ -94,7 +94,7 @@ class ShipperFragment : Fragment() {
         //Event
         searchView.setOnQueryTextListener(object:androidx.appcompat.widget.SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(search: String?): Boolean {
-                startSearchFood(search!!)
+                startSearchItem(search!!)
                 return true
             }
 
@@ -120,7 +120,7 @@ class ShipperFragment : Fragment() {
         }
     }
 
-    private fun startSearchFood(s: String) {
+    private fun startSearchItem(s: String) {
         val resultShipper: MutableList<ShipperModel> = ArrayList()
         for (i in shipperModels.indices)
         {
@@ -158,8 +158,8 @@ class ShipperFragment : Fragment() {
         val updateData = HashMap<String,Any>()
         updateData["active"] = updateActiveEvent.active
         FirebaseDatabase.getInstance()
-            .getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+            .getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.SHIPPER_REF)
             .child(updateActiveEvent.shipperModel.key!!)
             .updateChildren(updateData)

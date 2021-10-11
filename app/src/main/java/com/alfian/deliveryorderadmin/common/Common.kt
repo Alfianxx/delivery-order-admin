@@ -42,7 +42,7 @@ object Common {
     const val KEY_CHAT_SENDER: String ="CHAT_SENDER"
     const val KEY_CHAT_ROOM_ID: String ="CHAT_ROOM_ID"
     const val CHAT_REF: String= "Chat"
-    const val RESTAURANT_REF: String= "Restaurant" //same as name reference in firebase
+    const val SHOP_REF: String= "Shop" //same as name reference in firebase
     const val IMAGE_URL: String="IMAGE_URL"
     const val IS_SEND_IMAGE: String="IS_SEND_IMAGE"
 
@@ -51,7 +51,7 @@ object Common {
     const val SHIPPING_ORDER_REF: String="ShippingOrder"
     const val SHIPPER_REF: String="Shipper"
     const val ORDER_REF: String="Order"
-    var foodSelected: FoodModel?=null
+    var itemSelected: ItemModel?=null
     var categorySelected: CategoryModel?=null
 //    val CATEGORY_REF: String = "Category"
     const val CATEGORY_REF: String="Category"
@@ -187,9 +187,9 @@ object Common {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             val notificationChannel = NotificationChannel(channelId,
-                "Eat It V2",NotificationManager.IMPORTANCE_DEFAULT)
+                "Delivery Order",NotificationManager.IMPORTANCE_DEFAULT)
 
-            notificationChannel.description = "Eat It V2"
+            notificationChannel.description = "Delivery Order"
             notificationChannel.enableLights(true)
             notificationChannel.enableVibration(true)
             notificationChannel.lightColor = (Color.RED)
@@ -201,7 +201,7 @@ object Common {
 
         builder.setContentTitle(title!!).setContentText(content!!).setAutoCancel(true)
             .setSmallIcon(R.mipmap.ic_launcher_round)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources,R.drawable.ic_restaurant_menu_black_24dp))
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources,R.drawable.shop))
         if(pendingIntent != null)
             builder.setContentIntent(pendingIntent)
 
@@ -212,16 +212,15 @@ object Common {
 
     fun getNewOrderTopic(): String {
         return StringBuilder("/topics/")
-            .append(currentServerUser!!.restaurant) //"restaurant for server" and "uid" for client
+            .append(currentServerUser!!.shop) //"Shop for server" and "uid" for client
             .append("_")
             .append("new_order")
             .toString()
     }
 
     fun getNewsTopic(): String {
-        //restore something like: restaurantid_news
         return StringBuilder("/topics/")
-            .append(currentServerUser!!.restaurant!!)
+            .append(currentServerUser!!.shop!!)
             .append("_")
             .append("news")
             .toString()
@@ -245,7 +244,7 @@ object Common {
         return Observable.fromCallable{
             val bitmap = Glide.with(context)
                 .asBitmap()
-                .load(cartItem.foodImage)
+                .load(cartItem.itemImage)
                 .submit().get()
             val image = Image.getInstance(bitmapToByteArray(bitmap))
             image.scaleAbsolute(80.0f,80.0f)

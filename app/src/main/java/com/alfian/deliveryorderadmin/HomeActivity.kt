@@ -106,7 +106,7 @@ class HomeActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_category, R.id.nav_food_list, R.id.nav_order, R.id.nav_shipper
+                R.id.nav_category, R.id.nav_item_list, R.id.nav_order, R.id.nav_shipper
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -185,11 +185,11 @@ class HomeActivity : AppCompatActivity() {
 
                                 // Update to Firebase
                                 FirebaseDatabase.getInstance()
-                                    .getReference(Common.RESTAURANT_REF)
-                                    .child(Common.currentServerUser?.restaurant!!)
+                                    .getReference(Common.SHOP_REF)
+                                    .child(Common.currentServerUser?.shop!!)
                                     .child(Common.LOCATION_REF)
                                     .setValue(
-                                        RestaurantLocationModel(
+                                        ShopLocationModel(
                                             location.latitude,
                                             location.longitude
                                         )
@@ -448,7 +448,7 @@ class HomeActivity : AppCompatActivity() {
             .setMessage("Do you really want to exit?")
             .setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
             .setPositiveButton("OK") { _, _ ->
-                Common.foodSelected = null
+                Common.itemSelected = null
                 Common.categorySelected = null
                 Common.currentServerUser = null
                 FirebaseAuth.getInstance().signOut()
@@ -487,16 +487,16 @@ class HomeActivity : AppCompatActivity() {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onCategoryClick(event: CategoryClick) {
         if (event.isSuccess) {
-            if (menuClick != R.id.nav_food_list) {
-                navController.navigate(R.id.nav_food_list)
-                menuClick = R.id.nav_food_list
+            if (menuClick != R.id.nav_item_list) {
+                navController.navigate(R.id.nav_item_list)
+                menuClick = R.id.nav_item_list
             }
         }
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onChangeMenuEvent(event: ChangeMenuClick) {
-        if (!event.isFromFoodList) {
+        if (!event.isFromItemList) {
             //Clear
             navController.popBackStack(R.id.nav_category, true)
             navController.navigate(R.id.nav_category)
@@ -517,7 +517,7 @@ class HomeActivity : AppCompatActivity() {
                 Toast.makeText(this, "Delete Success", Toast.LENGTH_SHORT).show()
             }
         }
-        EventBus.getDefault().postSticky(ChangeMenuClick(event.isBackFromFoodList))
+        EventBus.getDefault().postSticky(ChangeMenuClick(event.isBackFromItemList))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -613,15 +613,15 @@ class HomeActivity : AppCompatActivity() {
                 .subscribe({ cartItem -> //on next
 
                     //Each item we will add detail
-                    //Food Name
+                    //Item Name
                     PDFUtils.addNewItemWithLeftAndRight(
                         document,
-                        cartItem.foodName!!,
+                        cartItem.itemName!!,
                         "(0.0%)",
                         titleFont,
                         orderNumberValueFont
                     )
-                    //Food size and addon
+                    //Item size and addon
                     // TODO : Hapus nanti : size
 //                    PDFUtils.addNewItemWithLeftAndRight(
 //                        document,
@@ -639,15 +639,15 @@ class HomeActivity : AppCompatActivity() {
 //                        orderNumberValueFont
 //                    )
 
-                    //Food price
+                    //Item price
                     //format : 1*30 = 30
                     PDFUtils.addNewItemWithLeftAndRight(
                         document,
-                        StringBuilder("Harga: ").append(cartItem.foodQuantity)
+                        StringBuilder("Harga: ").append(cartItem.itemQuantity)
                             .append(" x ")
-                            .append(cartItem.foodExtraPrice.toInt() + cartItem.foodPrice.toInt())
+                            .append(cartItem.itemExtraPrice.toInt() + cartItem.itemPrice.toInt())
                             .toString(),
-                        StringBuilder().append(cartItem.foodQuantity * (cartItem.foodExtraPrice + cartItem.foodPrice).toInt())
+                        StringBuilder().append(cartItem.itemQuantity * (cartItem.itemExtraPrice + cartItem.itemPrice).toInt())
                             .toString(),
                         titleFont,
                         orderNumberValueFont

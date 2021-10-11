@@ -14,8 +14,8 @@
     <group>
         <item
             android:id="@+id/nav_category"
-            android:icon="@drawable/ic_restaurant_black_24dp"
-            android:title="@string/menu_category" />
+            android:icon="@drawable/shop"
+            android:title="@string/menu_product" />
 
     </group>
 

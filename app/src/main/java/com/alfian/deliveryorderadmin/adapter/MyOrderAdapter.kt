@@ -35,7 +35,7 @@ class MyOrderAdapter (internal var context: Context,
         var txtNumItem: TextView?=null
         var txtName: TextView?=null
 
-        var imgFoodImage: ImageView?=null
+        var imgItem: ImageView?=null
 
         private var iRecyclerItemClickListener: IRecyclerItemClickListener?=null
 
@@ -45,7 +45,7 @@ class MyOrderAdapter (internal var context: Context,
         }
 
         init {
-            imgFoodImage = itemView.findViewById(R.id.img_food_image) as ImageView
+            imgItem = itemView.findViewById(R.id.img_item_image) as ImageView
 
             txtTime = itemView.findViewById(R.id.txt_time) as TextView
             txtOrderNumber = itemView.findViewById(R.id.txt_order_number) as TextView
@@ -70,8 +70,8 @@ class MyOrderAdapter (internal var context: Context,
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Glide.with(context).load(orderList[position].cartItemList!![0].foodImage)
-            .into(holder.imgFoodImage!!)
+        Glide.with(context).load(orderList[position].cartItemList!![0].itemImage)
+            .into(holder.imgItem!!)
         holder.txtOrderNumber!!.text = orderList[position].key
         Common.setSpanStringColor("Order date ",simpleDateFormat.format(orderList[position].createDate),
         holder.txtTime,Color.parseColor("#333639"))

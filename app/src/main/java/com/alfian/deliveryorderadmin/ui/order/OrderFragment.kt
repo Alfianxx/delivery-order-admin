@@ -245,8 +245,8 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
                                 .setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
                                 .setPositiveButton("DELETE"){ dialogInterface, _ ->
                                     FirebaseDatabase.getInstance()
-                                        .getReference(Common.RESTAURANT_REF)
-                                        .child(Common.currentServerUser!!.restaurant!!)
+                                        .getReference(Common.SHOP_REF)
+                                        .child(Common.currentServerUser!!.shop!!)
                                         .child(Common.ORDER_REF)
                                         .child(orderModel.key!!)
                                         .removeValue()
@@ -384,8 +384,8 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         rdiRestorePlaced: RadioButton?
     ) {
         val tempList:MutableList<ShipperModel> = ArrayList()
-        val shipperRef = FirebaseDatabase.getInstance().getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+        val shipperRef = FirebaseDatabase.getInstance().getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.SHIPPER_REF)
         val shipperActive = shipperRef.orderByChild("active").equalTo(true)
         shipperActive.addListenerForSingleValueEvent(object:ValueEventListener{
@@ -474,7 +474,7 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         dialog: AlertDialog
     ) {
         val shippingOrder = ShippingOrderModel()
-        shippingOrder.restaurantKey = Common.currentServerUser!!.restaurant!!
+        shippingOrder.shopKey = Common.currentServerUser!!.shop!!
         shippingOrder.shipperName = shipperModel.name
         shippingOrder.shipperPhone = shipperModel.phone
         shippingOrder.orderModel = orderModel
@@ -482,8 +482,8 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
         shippingOrder.currentLat = -1.0
         shippingOrder.currentLng = -1.0
         FirebaseDatabase.getInstance()
-            .getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+            .getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.SHIPPING_ORDER_REF)
             .child(orderModel.key!!) //change push() to key()
             .setValue(shippingOrder)
@@ -557,8 +557,8 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
 
 
             FirebaseDatabase.getInstance()
-                .getReference(Common.RESTAURANT_REF)
-                .child(Common.currentServerUser!!.restaurant!!)
+                .getReference(Common.SHOP_REF)
+                .child(Common.currentServerUser!!.shop!!)
                 .child(Common.ORDER_REF)
                 .child(orderModel.key!!)
                 .removeValue()
@@ -585,8 +585,8 @@ class OrderFragment: Fragment(), IShipperLoadCallbackListener {
             updateData["orderStatus"] = status
 
             FirebaseDatabase.getInstance()
-                .getReference(Common.RESTAURANT_REF)
-                .child(Common.currentServerUser!!.restaurant!!)
+                .getReference(Common.SHOP_REF)
+                .child(Common.currentServerUser!!.shop!!)
                 .child(Common.ORDER_REF)
                 .child(orderModel.key!!)
                 .updateChildren(updateData)

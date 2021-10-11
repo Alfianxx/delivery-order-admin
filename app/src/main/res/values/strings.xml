@@ -11,13 +11,11 @@
     <string name="action_filter">Filter</string>
 
 
-    <string name="menu_category">Categories</string>
-    <string name="menu_food_list">Food List</string>
+    <string name="menu_product">Daftar Produk</string>
+    <string name="menu_item_list">Item List</string>
     <string name="menu_order">Orders</string>
     <string name="menu_shipper">Shippers</string>
     <string name="menu_sign_out">Sign out</string>
-    <string name="menu_best_deals">Best Deals</string>
-    <string name="menu_most_popular">Most Popular</string>
 
     <string name="home_second">Home Second</string>
     <string name="title_activity_tracking_order">Map</string>

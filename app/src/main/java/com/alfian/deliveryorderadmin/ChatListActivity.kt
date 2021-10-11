@@ -86,8 +86,8 @@ class ChatListActivity : AppCompatActivity() {
 
     private fun initViews() {
         database = FirebaseDatabase.getInstance()
-        chatRef = database.getReference(Common.RESTAURANT_REF)
-            .child(Common.currentServerUser!!.restaurant!!)
+        chatRef = database.getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser!!.shop!!)
             .child(Common.CHAT_REF)
 
         val query:Query = chatRef
@@ -99,7 +99,7 @@ class ChatListActivity : AppCompatActivity() {
         recycler_chat_list.layoutManager = layoutManager
         recycler_chat_list.addItemDecoration(DividerItemDecoration(this, layoutManager.orientation))
 
-        toolbar.title = Common.currentServerUser!!.restaurant!!
+        toolbar.title = Common.currentServerUser!!.shop!!
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

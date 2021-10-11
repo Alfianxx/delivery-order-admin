@@ -43,11 +43,11 @@ class CategoryViewModel : ViewModel(), ICategoryCallBackListener {
 
         try {
 
-            Log.d("abcd", "loadCategory: current restaurant = ${Common.currentServerUser?.restaurant}")
+            Log.d("abcd", "loadCategory: current shop = ${Common.currentServerUser?.shop}")
 
-            val categoryRef = FirebaseDatabase.getInstance().getReference(Common.RESTAURANT_REF)
-                .child(Common.currentServerUser!!.restaurant!!)
-//                .child("restauranta")
+            val categoryRef = FirebaseDatabase.getInstance().getReference(Common.SHOP_REF)
+                .child(Common.currentServerUser!!.shop!!)
+//                .child("restauranta")     // todo : ganti/hapus
                 .child(Common.CATEGORY_REF)
 
             categoryRef.addListenerForSingleValueEvent(object: ValueEventListener {
@@ -59,7 +59,7 @@ class CategoryViewModel : ViewModel(), ICategoryCallBackListener {
                     for (itemSnapshot in p0.children)
                     {
                         val model = itemSnapshot.getValue<CategoryModel>(CategoryModel::class.java)
-                        model!!.menu_id = itemSnapshot.key
+                        model!!.menuId = itemSnapshot.key
                         tempList.add(model)
                     }
                     categoryCallBackListener.onCategoryLoadSuccess(tempList)
