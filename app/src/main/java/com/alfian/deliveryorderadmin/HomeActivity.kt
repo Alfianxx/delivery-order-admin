@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
 import android.print.PrintAttributes
@@ -38,7 +40,10 @@ import com.alfian.deliveryorderadmin.remote.RetrofitFCMClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
@@ -146,17 +151,73 @@ class HomeActivity : AppCompatActivity() {
         //View
         val headerView = navView.getHeaderView(0)
         val txtUser = headerView.findViewById<View>(R.id.txt_user) as TextView
-        Common.setSpanString("Hey ", Common.currentServerUser!!.name, txtUser)
+        val txtAddress = headerView.findViewById<View>(R.id.tvAddress) as TextView
+        Common.setSpanString("Halo ", Common.currentServerUser!!.name, txtUser)
+
+
 
         menuClick = R.id.nav_category //Default
 
         checkOpenOrderFragment()
+
+        getAddressFromFirebase { address ->
+            Common.setSpanString("Alamat :", address, txtAddress)
+        }
+
+    }
+
+    private fun coordinateToAddress(lat: Double?, lng: Double?): String {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses: List<Address>?
+        val address: Address?
+        var addressText = ""
+
+
+        if (lat != null && lng != null){
+            addresses = geocoder.getFromLocation(lat, lng, 1)
+
+            if (addresses.isNotEmpty()) {
+                address = addresses[0]
+                addressText = address.getAddressLine(0)
+            } else{
+                addressText = "alamat tidak ditemukan"
+            }
+        }
+        val resultAddress = addressText.split(",")
+
+        return resultAddress[0] + resultAddress[1]
+    }
+
+    private fun setAddressToFirebase(lat: Double, lng: Double) {
+        val shopModel = ShopModel(coordinateToAddress(lat, lng))
+        FirebaseDatabase.getInstance().getReference(Common.SHOP_REF)
+            .child(Common.currentServerUser?.shop!!)
+            .child(Common.SHOP_ADMIN)
+            .setValue(
+                shopModel
+            )
+    }
+
+    private fun getAddressFromFirebase(listener: (String) -> Unit) {
+
+        FirebaseDatabase.getInstance().getReference(Common.SHOP_REF)
+            .child(Common.MYSHOP)
+            .child(Common.SHOP_ADMIN)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val shopModel = snapshot.getValue(ShopModel::class.java)
+                    shopModel?.address?.let { listener(it) }
+                }
+
+                override fun onCancelled(error: DatabaseError) = Unit
+
+            })
     }
 
     private fun showLocationDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("update location")
-            .setMessage("Do you really want to update your location")
+            .setMessage("Apakah Anda ingin mengupdate lokasi ?")
 
         builder.setNegativeButton("NO") { dialogInterface, _ -> dialogInterface.dismiss() }
         builder.setPositiveButton("YES") { _, _ ->
@@ -182,8 +243,9 @@ class HomeActivity : AppCompatActivity() {
                         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
 
                             if (location != null) {
-
-                                // Update to Firebase
+                                //update address to firebase
+                                setAddressToFirebase(location.latitude, location.longitude)
+                                // Update coordinate to Firebase
                                 FirebaseDatabase.getInstance()
                                     .getReference(Common.SHOP_REF)
                                     .child(Common.currentServerUser?.shop!!)

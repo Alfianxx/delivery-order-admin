@@ -5,5 +5,5 @@ class ServerUserModel {
     var name:String? = null
     var phone:String? = null
     var isActive:Boolean = false
-    var shop:String? = "restauranta"
+    var shop:String? = "myshop"
 }

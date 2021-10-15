@@ -46,6 +46,9 @@ object Common {
     const val IMAGE_URL: String="IMAGE_URL"
     const val IS_SEND_IMAGE: String="IS_SEND_IMAGE"
 
+    const val SHOP_ADMIN = "ShopAdmin"      // baru
+    const val MYSHOP = "myshop"
+
     const val IS_OPEN_ACTIVITY_NEW_ORDER: String ="IsOpenActivityOrder    "
     var currentOrderSelected: OrderModel?=null
     const val SHIPPING_ORDER_REF: String="ShippingOrder"
