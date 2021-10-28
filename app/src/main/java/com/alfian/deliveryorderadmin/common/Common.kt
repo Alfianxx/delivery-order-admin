@@ -164,10 +164,10 @@ object Common {
     fun convertStatusToString(orderStatus: Int): String =
         when(orderStatus)
         {
-            0 -> "Placed"
-            1 -> "Shipping"
-            2 -> "Shipped"
-            -1 -> "Cancelled"
+            0 -> "Memesan"
+            1 -> "Dikirim"
+            2 -> "Sampai"
+            -1 -> "Dibatalkan"
             else -> "Error"
         }
 

@@ -20,7 +20,7 @@ class MyItemListAdapter (internal var context: Context,
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         Glide.with(context).load(itemList[position].image).into(holder.imgItemImage!!)
         holder.txtItemName!!.text = itemList[position].name
-        holder.txtItemPrice!!.text = StringBuilder("$").append(itemList[position].price.toString())
+        holder.txtItemPrice!!.text = StringBuilder("Rp ").append(itemList[position].price.toString())
 
         //Event
         holder.setListener(object: IRecyclerItemClickListener {

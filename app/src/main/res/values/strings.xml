@@ -10,15 +10,14 @@
     <string name="action_search">Search</string>
     <string name="action_filter">Filter</string>
 
-
-    <string name="menu_product">Daftar Produk</string>
+    <string name="menu_product">Kategori Produk</string>
     <string name="menu_item_list">Item List</string>
-    <string name="menu_order">Orders</string>
-    <string name="menu_shipper">Shippers</string>
+    <string name="menu_order">Pesanan</string>
+    <string name="menu_shipper">Pengantar</string>
     <string name="menu_sign_out">Sign out</string>
 
     <string name="home_second">Home Second</string>
     <string name="title_activity_tracking_order">Map</string>
     <string name="menu_news">News</string>
-    <string name="menu_location">Location</string>
+    <string name="menu_location">Lokasi</string>
 </resources>

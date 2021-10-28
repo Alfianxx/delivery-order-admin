@@ -12,7 +12,7 @@
 
         <EditText
             android:id="@+id/edt_item_name"
-            android:hint="Food Name"
+            android:hint="Nama Produk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -24,7 +24,7 @@
 
         <EditText
             android:id="@+id/edt_item_price"
-            android:hint="Food Price"
+            android:hint="Harga Produk"
             android:inputType="number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -37,7 +37,7 @@
 
         <EditText
             android:id="@+id/edt_item_description"
-            android:hint="Food Description"
+            android:hint="Deskripsi Produk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </com.google.android.material.textfield.TextInputLayout>

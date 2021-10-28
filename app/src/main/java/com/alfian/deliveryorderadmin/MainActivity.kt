@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         else{
                             dialog!!.dismiss()
-                            Toast.makeText(this@MainActivity,"You must be allowed from Admin to access this app",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity,"Anda harus izin ke Admin",Toast.LENGTH_SHORT).show()
 
                         }
                     }
@@ -114,8 +114,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showRegisterDialog(user: FirebaseUser) {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("Register")
-        builder.setMessage("Please fill information \n Admin will accept your account late")
+        builder.setTitle("Registrasi")
+        builder.setMessage("Mohon Isi Data Anda")
 
         val itemView = LayoutInflater.from(this).inflate(R.layout.layout_register,null)
         val phoneInputLayout = itemView.findViewById<View>(R.id.phone_input_layout) as TextInputLayout
@@ -132,10 +132,10 @@ class MainActivity : AppCompatActivity() {
         else
             edtPhone.setText(user.phoneNumber)
 
-        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
-            .setPositiveButton("REGISTER") { _, _ ->
+        builder.setNegativeButton("Batal") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setPositiveButton("Registrasi") { _, _ ->
                 if (TextUtils.isEmpty(edtName.text)) {
-                    Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Isi nama anda", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -143,8 +143,7 @@ class MainActivity : AppCompatActivity() {
                 serverUserModel.uid = user.uid
                 serverUserModel.name = edtName.text.toString()
                 serverUserModel.phone = edtPhone.text.toString()
-                serverUserModel.isActive =
-                    true //Default fail, we must active user by manual on Firebase   //TODO: Ganti false
+                serverUserModel.isActive = true   //Ganti false kalo mau cek
 
                 dialog!!.show()
                 serverRef!!.child(serverUserModel.uid!!)
@@ -157,9 +156,10 @@ class MainActivity : AppCompatActivity() {
                         dialog!!.dismiss()
                         Toast.makeText(
                             this,
-                            "Register success! Admin will check and active user soon",
+                            "Registrasi Berhasil",
                             Toast.LENGTH_SHORT
                         ).show()
+                        checkServerUserFromFirebase(user)
                     }
             }
 
@@ -183,7 +183,6 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == APP_REQUEST_CODE)
         {
-
             if (resultCode == Activity.RESULT_OK)
             {
                 val user = FirebaseAuth.getInstance().currentUser

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/txt_order_filter"
-        android:text="Orders (0)"
+        android:text="Pesanan (0)"
         android:padding="16dp"
         android:textSize="20sp"
         android:fontFamily="@font/brandon_medium"

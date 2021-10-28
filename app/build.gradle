@@ -99,4 +99,25 @@ dependencies {
 
     //Location
     implementation 'com.google.android.gms:play-services-location:18.0.0'
+
+    //csv
+//    implementation 'com.opencsv:opencsv:4.6'
+
+    //excel
+    implementation 'org.apache.poi:poi:3.17'
+    implementation 'org.apache.poi:poi-ooxml:3.17'
+//    implementation 'com.android.support:multidex:1.0.3'
+
+//    implementation 'org.apache.poi:poi:4.0.0'
+//    implementation 'org.apache.poi:poi-ooxml:4.0.0'
+
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
+    implementation group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '3.1.0'
+    implementation 'javax.xml.stream:stax-api:1.0'
+    implementation 'com.fasterxml:aalto-xml:1.2.2'
+
+    //Apache POI for excel
+//    implementation 'com.github.SUPERCILEX.poi-android:poi:3.17'
+//    compileOnly 'org.apache.poi:poi-ooxml:3.17'
 }
+

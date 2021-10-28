@@ -276,8 +276,8 @@ class ItemListFragment : Fragment() {
 
     private fun showAddItemDialog() {
         val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Create")
-        builder.setMessage("Please fill information")
+        builder.setTitle("Buat Produk")
+        builder.setMessage("Isi Data")
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_item,null)
 
@@ -298,8 +298,8 @@ class ItemListFragment : Fragment() {
             startActivityForResult(Intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST)
         }
 
-        builder.setNegativeButton("CANCEL") { dialogInterface, _ -> dialogInterface.dismiss() }
-        builder.setPositiveButton("CREATE"){ dialogInterface, _ ->
+        builder.setNegativeButton("Batal") { dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("Buat"){ dialogInterface, _ ->
 
             val updateItem = ItemModel()
             updateItem.name = edtItemName.text.toString()

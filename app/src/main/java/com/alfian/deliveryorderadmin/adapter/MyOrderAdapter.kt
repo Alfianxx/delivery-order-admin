@@ -73,17 +73,17 @@ class MyOrderAdapter (internal var context: Context,
         Glide.with(context).load(orderList[position].cartItemList!![0].itemImage)
             .into(holder.imgItem!!)
         holder.txtOrderNumber!!.text = orderList[position].key
-        Common.setSpanStringColor("Order date ",simpleDateFormat.format(orderList[position].createDate),
+        Common.setSpanStringColor("Tanggal pesan ",simpleDateFormat.format(orderList[position].createDate),
         holder.txtTime,Color.parseColor("#333639"))
 
-        Common.setSpanStringColor("Order status ",Common.convertStatusToString(orderList[position].orderStatus),
+        Common.setSpanStringColor("Status pesanan ",Common.convertStatusToString(orderList[position].orderStatus),
             holder.txtOrderStatus,Color.parseColor("#005758"))
 
-        Common.setSpanStringColor("Num of items ",if (orderList[position].cartItemList == null) "0"
+        Common.setSpanStringColor("Jumlah ",if (orderList[position].cartItemList == null) "0"
             else orderList[position].cartItemList!!.size.toString(),
             holder.txtNumItem,Color.parseColor("#00574B"))
 
-        Common.setSpanStringColor("Name ",orderList[position].userName,
+        Common.setSpanStringColor("Nama ",orderList[position].userName,
             holder.txtName,Color.parseColor("#006061"))
 
         holder.setListener(object:IRecyclerItemClickListener{

@@ -138,9 +138,11 @@ class HomeActivity : AppCompatActivity() {
                     navController.popBackStack() //Clear back stack
                     navController.navigate(R.id.nav_order)
                 }
-            } else if (p0.itemId == R.id.nav_news) {
-                showSendNewsDialog()
-            } else if (p0.itemId == R.id.nav_location) {
+            }
+//            else if (p0.itemId == R.id.nav_news) {    // news
+//                showSendNewsDialog()
+//            }
+            else if (p0.itemId == R.id.nav_location) {
                 showLocationDialog()
             }
 
@@ -625,11 +627,11 @@ class HomeActivity : AppCompatActivity() {
 
             //Create title of document
             val titleFont = Font(fontName, 36.0f, Font.NORMAL, BaseColor.BLACK)
-            PDFUtils.addNewItem(document, "Order Details", Element.ALIGN_CENTER, titleFont)
+            PDFUtils.addNewItem(document, "Detail Pesanan", Element.ALIGN_CENTER, titleFont)
 
             //add more
             val orderNumberFont = Font(fontName, fontSize, Font.NORMAL, colorAccent)
-            PDFUtils.addNewItem(document, "Order No:", Element.ALIGN_LEFT, orderNumberFont)
+            PDFUtils.addNewItem(document, "No. Pesanan:", Element.ALIGN_LEFT, orderNumberFont)
 
             val orderNumberValueFont = Font(fontName, fontSize, Font.NORMAL, BaseColor.BLACK)
             PDFUtils.addNewItem(
@@ -641,7 +643,7 @@ class HomeActivity : AppCompatActivity() {
             PDFUtils.addLineSeparator(document)
 
             //Date
-            PDFUtils.addNewItem(document, "Order Date:", Element.ALIGN_LEFT, orderNumberFont)
+            PDFUtils.addNewItem(document, "Waktu Pesan:", Element.ALIGN_LEFT, orderNumberFont)
             PDFUtils.addNewItem(
                 document, SimpleDateFormat("dd-MM-yyyy").format(orderModel.createDate),
                 Element.ALIGN_LEFT, orderNumberValueFont
@@ -649,7 +651,7 @@ class HomeActivity : AppCompatActivity() {
             PDFUtils.addLineSeparator(document)
 
             //Account name
-            PDFUtils.addNewItem(document, "Account Name:", Element.ALIGN_LEFT, orderNumberFont)
+            PDFUtils.addNewItem(document, "Nama:", Element.ALIGN_LEFT, orderNumberFont)
             PDFUtils.addNewItem(
                 document, orderModel.userName!!,
                 Element.ALIGN_LEFT, orderNumberValueFont
@@ -658,7 +660,7 @@ class HomeActivity : AppCompatActivity() {
 
             //Product Detail
             PDFUtils.addLineSpace(document)
-            PDFUtils.addNewItem(document, "Product Detail", Element.ALIGN_CENTER, titleFont)
+            PDFUtils.addNewItem(document, "Detail Produk", Element.ALIGN_CENTER, titleFont)
             PDFUtils.addLineSeparator(document)
 
             //Use RxJava, fetch image from url and add to PDF
@@ -679,7 +681,7 @@ class HomeActivity : AppCompatActivity() {
                     PDFUtils.addNewItemWithLeftAndRight(
                         document,
                         cartItem.itemName!!,
-                        "(0.0%)",
+                        "", // kanan pdf nama produk
                         titleFont,
                         orderNumberValueFont
                     )

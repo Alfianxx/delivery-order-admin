@@ -179,8 +179,8 @@ class CategoryFragment : Fragment() {
 
     private fun showUpdateDialog() {
         val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        builder.setTitle("Update Category")
-        builder.setMessage("Please fill information")
+        builder.setTitle("Update Kategori")
+        builder.setMessage("Isi Data")
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_category,null)
         val edtCategoryName = itemView.findViewById<View>(R.id.edt_category_name) as EditText
@@ -253,8 +253,8 @@ class CategoryFragment : Fragment() {
 
     private fun showAddDialog() {
         val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        builder.setTitle("Add Category")
-        builder.setMessage("Please fill information")
+        builder.setTitle("Tambah Kategori")
+        builder.setMessage("Isi Data")
 
         val itemView = LayoutInflater.from(context).inflate(R.layout.layout_update_category,null)
         val edtCategoryName = itemView.findViewById<View>(R.id.edt_category_name) as EditText
@@ -271,8 +271,8 @@ class CategoryFragment : Fragment() {
             startActivityForResult(Intent.createChooser(intent,"Select Picture"),PICK_IMAGE_REQUEST)
         }
 
-        builder.setNegativeButton("CANCEL"){ dialogInterface, _ -> dialogInterface.dismiss() }
-        builder.setPositiveButton("CREATE"){ _, _ ->
+        builder.setNegativeButton("Batal"){ dialogInterface, _ -> dialogInterface.dismiss() }
+        builder.setPositiveButton("Buat"){ _, _ ->
 
 
             val categoryModel = CategoryModel()
